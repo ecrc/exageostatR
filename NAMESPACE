@@ -1,0 +1,7 @@
+useDynLib(exageostat)
+export(TestWrapper)
+export(exageostat_gen_zR)
+export(exageostat_likelihoodR)
+export(exageostat_initR)
+export(exageostat_finalizeR)
+

@@ -1,0 +1,15 @@
+citHeader("To cite package 'exageostat' in publications use:")
+
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+vers <- paste("R package version", meta$Version)
+
+citEntry(entry="Manual",
+         title = "ExaGeoStat: A High Performance Unified Framework for Geostatistics on Manycore Systems",
+         author = personList(as.person("Sameh Abdulah"), as.person("Hatem Ltaief"), as.person("Ying Sun"), as.person("Marc G. Genton"), as.person("David E. Keyes")),
+         year = year,
+         note = vers,
+         textVersion =
+         paste("Sameh Abdulah, Hatem Ltaief, Ying Sun, Marc G. Genton, and David E. Keyes (",
+         year,
+         "). ExaGeoStat: A High Performance Unified Framework for Geostatistics on Manycore Systems.",
+         vers, ".", sep=""))

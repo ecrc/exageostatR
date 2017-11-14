@@ -1,0 +1,71 @@
+# Configure script for R package generation
+#
+#
+#
+
+err=0
+
+# check submodules
+#git submodule update --init
+#git clone --recurse-submodules --branch v0.1.0 https://github.com/ecrc/exageostat src
+
+
+## check dependencies
+# StarPU
+if pkg-config --exists libstarpu
+then
+    _LOCATION=`pkg-config --variable=prefix libstarpu`
+    echo "StarPU FOUND in [$_LOCATION]"
+else
+    echo "####################"
+    echo "StarPU NOT FOUND"
+    echo "Please download it from: http://starpu.gforge.inria.fr/files/"
+    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+    echo ""
+    err=1
+fi
+# CHAMELEON
+if pkg-config --exists chameleon
+then
+    _LOCATION=`pkg-config --variable=prefix chameleon`
+    echo "CHAMELEON FOUND in [$_LOCATION]"
+else
+    echo "####################"
+    echo "CHAMELEON NOT FOUND"
+    echo "Please download it from: https://gitlab.inria.fr/solverstack/chameleon.git"
+    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+    echo ""
+    err=1
+fi
+# nlopt
+if pkg-config --exists nlopt
+then
+    _LOCATION=`pkg-config --variable=prefix nlopt`
+    echo "nlopt FOUND in [$_LOCATION]"
+else
+    echo "####################"
+    echo "nlopt NOT FOUND"
+    echo "Please download it from: http://starpu.gforge.inria.fr/files/"
+    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+    echo ""
+    err=1
+fi
+
+if [ $err -gt 0 ]
+then
+    exit 1
+fi
+
+# Remove cached files
+#rm -rf CMakeFiles CMakeCache.txt
+
+# Generate makefiles
+#cmake ./src -DBUILD_SHARED_LIBS=ON
+
+# Dummy makefile in src to trigger real one from cmake.
+#cat > src/Makefile << EOF
+#.PHONY: all clean
+#all:
+#    (cd .. && make && cp ./lib*.so ./src/exageostat.so)
+
+#EOF
