@@ -50,7 +50,7 @@ More information
 
 A more detailed description of the underlying ExaGeoStat software package can be found. [here](https://github.com/ecrc/exageostat)
 
-R Example
+R script example
 ================
 ```r
 library("exageostat")					#Load ExaGeoStat-R lib.
@@ -82,4 +82,19 @@ vecs_out	= exageostat_gen_zR(n, ncores, gpus, ts, p_grid, q_grid, theta1, theta2
 theta_out	= exageostat_likelihoodR(n, ncores, gpus, ts, p_grid, q_grid,  vecs_out[1:n],  vecs_out[n+1:(2*n)],  vecs_out[(2*n+1):(3*n)], clb, cub, computation, dmetric)
 #Finalize ExaGeoStat instance
 exageostat_finalizeR()
+```
+Batch R script to distributed environment example
+=================================================
+```r
+#!/bin/bash
+#SBATCH --job-name=job_name
+#SBATCH --output=output_file.txt
+#SBATCH --partition=XXXX
+#SBATCH --nodes=4
+#SBATCH --ntasks=4
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=31
+#SBATCH --time 00:30:00
+
+srun Rscript Rtest.r
 ```
