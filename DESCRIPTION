@@ -1,7 +1,7 @@
 Package: exageostat
 SystemRequirements: GNU make, libstarpu, libnlopt, libgsl, libstarpu-1.2, libchameleon, libchameleon_starpu, libmkl_intel_lp64, libmkl_sequential, libmkl_core, libpthread, libm
-Version: 0.1.0
-Date: 2017-11-14
+Version: 0.1.1
+Date: 2018-06-28
 Title: R package demonstrates the R / C Language interface for ExaGeoStat
 Author: Sameh Abdulah <sameh.abdulah@kaust.edu.sa>
 Maintainer: Sameh Abdulah <sameh.abdulah@kaust.edu.sa>
@@ -15,5 +15,5 @@ Description: ExaGeoStat-R is an R-wrapper for ExaGeoStat: a parallel
 	     framework targets many-core systems: clusters of CPUs
              and GPUs.
 License: GPL (version 2 or later)
-Packaged: Tuesday Nov. 14 13:01:38 2017; sameh
+Packaged: Tuesday June 28 13:01:38 2018; sameh
 
