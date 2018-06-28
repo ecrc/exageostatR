@@ -18,7 +18,9 @@ exageostat_likelihoodR(n,
 		clb,
 		cub,
 		computation,
-		dmetric)
+		dmetric,
+                opt_tol,
+                opt_max_iters)
 }
 
 \arguments{
@@ -35,6 +37,8 @@ exageostat_likelihoodR(n,
   \item{ cub     }{ Double vector - optimizer upper bounds theta values }
   \item{ computation }{ String - "exact" or "approx" }
   \item{ dmetric     }{ String - "dm" or "gcd" }
+  \item{ opt_tol         }{ Double - optimizer termination tolerance }
+  \item{ opt_max_iters   }{ Double - optimizer maximum number of iterations }
 }
 
 \value{
@@ -57,6 +61,8 @@ exageostat_likelihoodR(n,
 #		theta,
 #		computation,
 #		dmetric)
+#               opt_tol,
+#               opt_max_iters)
 }
 
 

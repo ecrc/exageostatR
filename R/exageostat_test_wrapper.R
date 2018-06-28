@@ -10,10 +10,10 @@
  # @file exageostat_test_wrapper.R
  # ExaGeoStat R wrapper functions
  #
- # @version 0.1.0
+ # @version 0.1.1
  #
  # @author Sameh Abdulah
- # @date 2017-11-14
+ # @date 2018-06-28
  
   
 TestWrapper <- function()
@@ -28,6 +28,8 @@ TestWrapper <- function()
 	ncores          = 2                                     #Number of underlying CPUs.
 	gpus            = 0                                     #Number of underlying GPUs.
 	ts              = 320                                   #Tile_size:  changing it can improve the performance. No fixed value can be given.
+	opt_tol         = 0.0001                                #Optimization termination tolerance.
+	opt_max_iters   = 20                                    #Optimization maximum number of iterations.
 	p_grid          = 1                                     #More than 1 in the case of distributed systems
 	q_grid          = 1                                     #More than 1 in the case of distributed systems ( usually equals to p_grid)
 	clb             = vector(mode="numeric",length = 3)     #Optimization function lower bounds values.
@@ -42,9 +44,9 @@ TestWrapper <- function()
 	#Initiate exageostat instance
 	rexageostat_initR(ncores, gpus, ts)
 	#Generate Z observation vector
-	vecs_out        = rexageostat_gen_zR(n, ncores, gpus, ts, p_grid, q_grid, theta1, theta2, theta3, computation, dmetric, globalveclen)
+	vecs_out        = exageostat_gen_zR(n, ncores, gpus, ts, p_grid, q_grid, theta1, theta2, theta3, computation, dmetric, globalveclen)
 	#Estimate MLE parameters
-	theta_out       = rexageostat_likelihoodR(n, ncores, gpus, ts, p_grid, q_grid,  vecs_out[1:n],  vecs_out[n+1:(2*n)],  vecs_out[(2*n+1):(3*n)], clb, cub, computation, dmetric)
+	theta_out       = exageostat_likelihoodR(n, ncores, gpus, ts, p_grid, q_grid,  vecs_out[1:n],  vecs_out[n+1:(2*n)],  vecs_out[(2*n+1):(3*n)], clb, cub, computation, dmetric, opt_tol, opt_max_iters)
 	#finalize exageostat instance
 	rexageostat_finalizeR()
 	print("Back from exageostat_gen_z! hit key...")
@@ -75,7 +77,7 @@ exageostat_gen_zR <- function(n, ncores, gpus, ts, p_grid, q_grid, theta1, theta
 }
 
 
-exageostat_likelihoodR <- function(n, ncores, gpus, ts, p_grid, q_grid, x, y, z, clb, cub, computation, dmetric)
+exageostat_likelihoodR <- function(n, ncores, gpus, ts, p_grid, q_grid, x, y, z, clb, cub, computation, dmetric, opt_tol, opt_max_iters)
 {
 	theta_out2= .C("rexageostat_likelihood",
 	                as.integer(n),
@@ -96,6 +98,8 @@ exageostat_likelihoodR <- function(n, ncores, gpus, ts, p_grid, q_grid, x, y, z,
 	                as.integer((3)),
 			as.integer(computation),
 	                as.integer(dmetric),
+                        as.numeric(opt_tol),
+                        as.integer(opt_max_iters),
 			theta_out=numeric(3))$theta_out		
 	theta_out[1:3] <- theta_out2[1:3]
 	print("back from exageostat_likelihood C function call. Hit key....")
