@@ -57,25 +57,6 @@ sed -i '/## EXAGEOSTAT-INSTALLATION-BEGIN/,/## EXAGEOSTAT-INSTALLATION-END/d'  ~
 
 #*****************************************************************************
 
-
-#*****************************************************************************download exageostat
-#if git -C $PWD remote -v | grep -q 'https://github.com/ecrc/exageostat-dev'
-#then
-    # we are, lets go to the top dir (where .git is)
-#    until test -d $PWD/.git ;
-#    do
-#        cd ..
-#    done;
-#else
-    #we are not, we need to clone the repo
-#    git clone -b sabdulah/refine-docs  https://github.com/ecrc/exageostat-dev.git
-#    cd exageostat-dev
-#fi
-#export EXAGEOSTATDEVDIR=$PWD
-#[[ -d dependencies ]] || mkdir dependencies
-#cd dependencies
-#SETUP_DIR=$PWD
-#echo 'export EXAGEOSTATDEVDIR='$PWD >> ~/.bashrc
 #*****************************************************************************install Nlopt
 cd $SETUP_DIR
 if [ ! -d "nlopt-2.4.2" ]; then
@@ -169,10 +150,10 @@ then
 else
         export DYLD_LIBRARY_PATH=$STARPUROOT/starpu_install/lib:$DYLD_LIBRARY_PATH
 fi
-#*****************************************************************************install chameleon
+#************************************************************************ Install Chameleon - Stars-H - HiCMA 
 cd $SETUP_DIR
 # Check if we are already in exageostat repo dir or not.
-if git -C $PWD remote -v | grep -q 'https://gitlab.inria.fr/solverstack/chameleon.git'
+if git -C $PWD remote -v | grep -q 'https://github.com/ecrc/exageostat-dev'
 then
         # we are, lets go to the top dir (where .git is)
         until test -d $PWD/.git ;
@@ -180,23 +161,65 @@ then
                 cd ..
         done;
 else
-        git clone https://gitlab.inria.fr/solverstack/chameleon.git
-        cd chameleon
+        git clone https://github.com/ecrc/exageostat-dev
+        cd exageostat-dev
 fi
+git submodule init
+git submodule update
+EXAGEOSTATROOT=$PWD
+
+cd hicma-dev
+HICMAROOT=$PWD
+git submodule init
+git submodule update
+############################# Chameleon Installation
+cd chameleon
+CHAMELEONROOT=$PWD
 git submodule init
 git submodule update
 mkdir -p build/installdir
 cd build
 CC=gcc cmake .. -DCMAKE_BUILD_TYPE=Debug -DCHAMELEON_USE_MPI=OFF -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DBUILD_SHARED_LIBS=ON
-make
+make -j
 make install
-CHAMELEONROOT=$PWD
-export PKG_CONFIG_PATH=$CHAMELEONROOT/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
+export PKG_CONFIG_PATH=$CHAMELEONROOT/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
 if [ $CURRENT_OS == "LINUX" ]
 then
-	export LD_LIBRARY_PATH=$CHAMELEONROOT/installdir/lib:$LD_LIBRARY_PATH
+        export LD_LIBRARY_PATH=$CHAMELEONROOT/build/installdir/lib:$LD_LIBRARY_PATH
 else
-        export DYLD_LIBRARY_PATH=$CHAMELEONROOT/installdir/lib:$DYLD_LIBRARY_PATH
+        export DYLD_LIBRARY_PATH=$CHAMELEONROOT/build/installdir/lib:$DYLD_LIBRARY_PATH
+fi
+############################# Stars-H Installation
+cd $EXAGEOSTATROOT
+cd stars-h-dev
+git submodule init
+git submodule update
+STARSHROOT=$PWD
+mkdir -p build/installdir
+cd build
+CC=gcc cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/installdir/ -DCMAKE_C_FLAGS=-fPIC
+make -j
+make install
+export PKG_CONFIG_PATH=$STARSHROOT/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
+if [ $CURRENT_OS == "LINUX" ]
+then
+        export LD_LIBRARY_PATH=$STARSHROOT/build/installdir/lib:$LD_LIBRARY_PATH
+else
+        export DYLD_LIBRARY_PATH=$STARSHROOT/build/installdir/lib:$DYLD_LIBRARY_PATH
+fi
+############################# HiCMA Installation
+cd $HICMAROOT
+mkdir -p build/installdir
+cd build
+CC=gcc cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DHICMA_USE_MPI=OFF -DCMAKE_C_FLAGS=-fPIC
+make -j
+make install
+export PKG_CONFIG_PATH=$HICMAROOT/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
+if [ $CURRENT_OS == "LINUX" ]
+then
+        export LD_LIBRARY_PATH=$HICMAROOT/build/installdir/lib:$LD_LIBRARY_PATH
+else
+        export DYLD_LIBRARY_PATH=$HICMAROOT/build/installdir/lib:$DYLD_LIBRARY_PATH
 fi
 #***************************************************************************** edit bashrc file
 echo '## EXAGEOSTAT-INSTALLATION-BEGIN' >> ~/.bashrc
@@ -239,14 +262,33 @@ else
         echo 'export DYLD_LIBRARY_PATH='$STARPUROOT'/starpu_install/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc
 fi
 #CHAMELEON
-echo 'export PKG_CONFIG_PATH='$CHAMELEONROOT'/installdir/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
+echo 'export PKG_CONFIG_PATH='$CHAMELEONROOT'/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
 if [ $CURRENT_OS == "LINUX" ]
 then
-	echo 'export LD_LIBRARY_PATH='$CHAMELEONROOT'/installdir/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+	echo 'export LD_LIBRARY_PATH='$CHAMELEONROOT'/build/installdir/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
 else
-        echo 'export DYLD_LIBRARY_PATH='$CHAMELEONROOT'/installdir/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc	
+        echo 'export DYLD_LIBRARY_PATH='$CHAMELEONROOT'/build/installdir/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc	
+fi
+#CHAMELEON
+echo 'export PKG_CONFIG_PATH='$HICMAROOT'/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
+if [ $CURRENT_OS == "LINUX" ]
+then
+        echo 'export LD_LIBRARY_PATH='$HICMAROOT'/build/installdir/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+        echo 'export CPATH='$HICMAROOT'/build/installdir/include:$CPATH' >> ~/.bashrc
+else
+        echo 'export DYLD_LIBRARY_PATH='$HICMAROOT'/build/installdir/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc
+fi
+#CHAMELEON
+echo 'export PKG_CONFIG_PATH='$STARSHROOT'/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
+if [ $CURRENT_OS == "LINUX" ]
+then
+        echo 'export LD_LIBRARY_PATH='$STARSHROOT'/build/installdir/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+        echo 'export CPATH='$STARSHROOT'/build/installdir/include:$CPATH' >> ~/.bashrc
+else
+        echo 'export DYLD_LIBRARY_PATH='$STARSHROOT'/build/installdir/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc
 fi
 #end
+
 echo '## EXAGEOSTAT-INSTALLATION-END' >> ~/.bashrc
 ##################################################################################
 #cd $EXAGEOSTATDEVDIR

@@ -56,6 +56,43 @@ then
     exit 1
 fi
 
+# starsh
+if pkg-config --exists hicma
+then
+    _LOCATION=`pkg-config --variable=prefix hicma`
+    echo "hicma FOUND in [$_LOCATION]"
+else
+    echo "####################"
+    echo "hicma NOT FOUND"
+    echo "Please download it from: https://github.com/ecrc/hicma"
+    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+    echo ""
+    err=1
+fi
+
+if [ $err -gt 0 ]
+then
+    exit 1
+fi
+
+# nlopt
+if pkg-config --exists starsh
+then
+    _LOCATION=`pkg-config --variable=prefix starsh`
+    echo "starsh FOUND in [$_LOCATION]"
+else
+    echo "####################"
+    echo "starsh NOT FOUND"
+    echo "Please download it from: https://github.com/ecrc/stars"
+    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+    echo ""
+    err=1
+fi
+
+if [ $err -gt 0 ]
+then
+    exit 1
+fi
 # Remove cached files
 #rm -rf CMakeFiles CMakeCache.txt
 

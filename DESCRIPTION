@@ -1,11 +1,11 @@
 Package: exageostat
-SystemRequirements: GNU make, libstarpu, libnlopt, libgsl, libstarpu-1.2, libchameleon, libchameleon_starpu, libmkl_intel_lp64, libmkl_sequential, libmkl_core, libpthread, libm
-Version: 0.1.1
-Date: 2018-06-28
+SystemRequirements: GNU make, libstarpu, libnlopt, libgsl, libstarpu-1.2, libchameleon, libchameleon_starpu, libhicma, libstarsh, libmkl_intel_lp64, libmkl_sequential, libmkl_core, libpthread, libm
+Version: 1.0.0
+Date: 2018-11-11
 Title: R package demonstrates the R / C Language interface for ExaGeoStat
 Author: Sameh Abdulah <sameh.abdulah@kaust.edu.sa>
 Maintainer: Sameh Abdulah <sameh.abdulah@kaust.edu.sa>
-Depends: R (>= 2.0.1), RhpcBLASctl
+Depends: R (>= 2.0.1), parallel
 Description: ExaGeoStat-R is an R-wrapper for ExaGeoStat: a parallel
              high performance unified framework for geostatistics on
              manycore systems. Its abbreviation stands for Exascale

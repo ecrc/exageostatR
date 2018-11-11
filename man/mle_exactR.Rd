@@ -1,12 +1,12 @@
-\name{exageostat_likelihoodR}
-\alias{exageostat_likelihoodR}
-\title{ Sets up the call to the rexageostat_likelihood() C language function accessed via the  R '.C' external function call API }
+\name{exageostat_emleR}
+\alias{exageostat_emleR}
+\title{ Sets up the call to the mle_exact() C language function accessed via the  R '.C' external function call API }
 \description{
-  \code{exageostat_likelihoodR} demonstrates the R / C language interface
+  \code{exageostat_emleR} demonstrates the R / C language interface
 }
 
 \usage{
-exageostat_likelihoodR(n,
+exageostat_emleR(n,
 		ncores,
 		gpus,
 		ts,
@@ -17,10 +17,7 @@ exageostat_likelihoodR(n,
 		z,
 		clb,
 		cub,
-		computation,
-		dmetric,
-                opt_tol,
-                opt_max_iters)
+		dmetric)
 }
 
 \arguments{
@@ -35,10 +32,7 @@ exageostat_likelihoodR(n,
   \item{ z       }{ Double vector - z observations at (x, y) }
   \item{ clb     }{ Double vector - optimizer lower bounds theta values }
   \item{ cub     }{ Double vector - optimizer upper bounds theta values }
-  \item{ computation }{ String - "exact" or "approx" }
   \item{ dmetric     }{ String - "dm" or "gcd" }
-  \item{ opt_tol         }{ Double - optimizer termination tolerance }
-  \item{ opt_max_iters   }{ Double - optimizer maximum number of iterations }
 }
 
 \value{
@@ -52,17 +46,14 @@ exageostat_likelihoodR(n,
 # inline call at R command line or in another R function:
 # Provides function arguments for and calls the R exageostat__gen_zR() function.
 #
-#exageostat_likelihood(n,
+#mle_exact(n,
 #               ncores,
 #               gpus,
 #               ts,
 #               p_grid,
 #		q_grid,
 #		theta,
-#		computation,
 #		dmetric)
-#               opt_tol,
-#               opt_max_iters)
 }
 
 

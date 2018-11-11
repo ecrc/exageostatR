@@ -1,3 +1,6 @@
 2017-11-14 version 0.1.0
 * The first release of ExaGeoStat-R
-
+2018-5-2
+* Tile Low-Rank (TLR) support of ExaGeoStat-R
+2018-11-11
+* Release v1.0.0

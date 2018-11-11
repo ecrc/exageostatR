@@ -1,11 +1,11 @@
-\name{exageostat_gen_zR}
-\alias{exageostat_gen_zR}
-\title{ Sets up the call to the rexageostat_gen_z() C language function accessed via the  R '.C' external function call API }
+\name{exageostat_egenzR}
+\alias{exageostat_egenzR}
+\title{ Sets up the call to the gen_z_exact() C language function accessed via the  R '.C' external function call API }
 \description{
-  \code{exageostat_gen_zR} demonstrates the R / C language interface
+  \code{exageostat_egenzR} demonstrates the R / C language interface
 }
 \usage{
-exageostat_gen_zR(n,
+exageostat_egenzR(n,
 		ncores,
 		gpus,
 		ts,
@@ -14,8 +14,8 @@ exageostat_gen_zR(n,
 		theta1,
 		theta2,
 		theta3,
-		computation,
 		dmetric,
+		seed,
 		globalveclen)
 }
 \arguments{
@@ -28,8 +28,8 @@ exageostat_gen_zR(n,
   \item{theta1}{Double  - initial theta1 values to generate z}
   \item{theta2}{Double  - initial theta2 values to generate z}
   \item{theta3}{Double  - initial theta3 values to generate z}
-  \item{computation}{ Integer - "0:exact" or "1:approx"}
   \item{dmetric}{ Integer - "0:dm" or "1:gcd"}
+  \item{seed}{Integer - initial seed}
   \item{globalveclen}{ Integer - output vector length}
 }
 \value{
@@ -43,14 +43,13 @@ exageostat_gen_zR(n,
 # inline call at R command line or in another R function:
 # Provides function arguments for and calls the R exageostat__gen_zR() function.
 #
-#exageostat_gen_zR(n,
+#exageostat_egenzR(n,
 #               ncores,
 #               gpus,
 #               ts,
 #               p_grid,
 #		q_grid,
 #		theta,
-#		computation,
 #		dmetric)
 }
 \keyword{programming}
