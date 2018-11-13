@@ -61,9 +61,6 @@ esac
 export MKLROOT=$MKLROOT
 . $MKLROOT/bin/mklvars.sh intel64
 
-#***************************************************************************** clean bashrc from previous installation
-sed -i '/## EXAGEOSTAT-INSTALLATION-BEGIN/,/## EXAGEOSTAT-INSTALLATION-END/d'  ~/.bashrc
-
 #*****************************************************************************
 
 #*****************************************************************************install Nlopt
@@ -119,7 +116,6 @@ fi
 #make -j install
 #CMAKEROOT=$PWD
 #export PATH=$PWD/cmake_install/bin/:$PATH
-#echo 'export PATH='$PWD'/cmake_install/bin/:$PATH' >> ~/.bashrc
 #*****************************************************************************install hwloc
 cd $SETUP_DIR
 if [  ! -d "hwloc-1.11.5" ]; then
@@ -230,75 +226,6 @@ then
 else
         export DYLD_LIBRARY_PATH=$HICMAROOT/build/installdir/lib:$DYLD_LIBRARY_PATH
 fi
-#***************************************************************************** edit bashrc file
-echo '## EXAGEOSTAT-INSTALLATION-BEGIN' >> ~/.bashrc
-#*****************************************************************************source intel MKL
-#MKL
-echo '. '$MKLROOT'/bin/mklvars.sh intel64' >> ~/.bashrc
-echo 'export MKLROOT='$MKLROOT >> ~/.bashrc
-echo 'export LD_PRELOAD='$MKLROOT'/lib/intel64/libmkl_core.so:'$MKLROOT'/lib/intel64/libmkl_sequential.so' >> ~/.bashrc
-
-#NLOPT
-echo 'export PKG_CONFIG_PATH='$NLOPTROOT'/nlopt_install/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
-if [ $CURRENT_OS == "LINUX" ]
-then
-	echo 'export LD_LIBRARY_PATH='$NLOPTROOT'/nlopt_install/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-else
-        echo 'export DYLD_LIBRARY_PATH='$NLOPTROOT'/nlopt_install/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc
-fi
-#GSL
-echo 'export PKG_CONFIG_PATH='$GSLROOT'/gsl_install/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
-if [ $CURRENT_OS == "LINUX" ]
-then
-	echo 'export LD_LIBRARY_PATH='$GSLROOT'/gsl_install/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-else
-        echo 'export DYLD_LIBRARY_PATH='$GSLROOT'/gsl_install/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc
-fi
-#hwloc
-echo 'export PKG_CONFIG_PATH='$HWLOCROOT'/hwloc_install/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
-if [ $CURRENT_OS == "LINUX" ]
-then
-	echo 'export LD_LIBRARY_PATH='$HWLOCROOT'/hwloc_install/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-else
-        echo 'export DYLD_LIBRARY_PATH='$HWLOCROOT'/hwloc_install/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc	
-fi
-#starpu
-echo 'export PKG_CONFIG_PATH='$STARPUROOT'/starpu_install/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
-if [ $CURRENT_OS == "LINUX" ]
-then
-	echo 'export LD_LIBRARY_PATH='$STARPUROOT'/starpu_install/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-else
-        echo 'export DYLD_LIBRARY_PATH='$STARPUROOT'/starpu_install/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc
-fi
-#CHAMELEON
-echo 'export PKG_CONFIG_PATH='$CHAMELEONROOT'/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
-if [ $CURRENT_OS == "LINUX" ]
-then
-	echo 'export LD_LIBRARY_PATH='$CHAMELEONROOT'/build/installdir/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-else
-        echo 'export DYLD_LIBRARY_PATH='$CHAMELEONROOT'/build/installdir/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc	
-fi
-#CHAMELEON
-echo 'export PKG_CONFIG_PATH='$HICMAROOT'/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
-if [ $CURRENT_OS == "LINUX" ]
-then
-        echo 'export LD_LIBRARY_PATH='$HICMAROOT'/build/installdir/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-        echo 'export CPATH='$HICMAROOT'/build/installdir/include:$CPATH' >> ~/.bashrc
-else
-        echo 'export DYLD_LIBRARY_PATH='$HICMAROOT'/build/installdir/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc
-fi
-#CHAMELEON
-echo 'export PKG_CONFIG_PATH='$STARSHROOT'/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
-if [ $CURRENT_OS == "LINUX" ]
-then
-        echo 'export LD_LIBRARY_PATH='$STARSHROOT'/build/installdir/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-        echo 'export CPATH='$STARSHROOT'/build/installdir/include:$CPATH' >> ~/.bashrc
-else
-        echo 'export DYLD_LIBRARY_PATH='$STARSHROOT'/build/installdir/lib:$DYLD_LIBRARY_PATH' >> ~/.bashrc
-fi
-#end
-
-echo '## EXAGEOSTAT-INSTALLATION-END' >> ~/.bashrc
 ##################################################################################
 #cd $EXAGEOSTATDEVDIR
 #rm -rf build
