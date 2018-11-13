@@ -5,7 +5,26 @@ if [ $# -le 0 ]; then
 	exit 1
 fi
 
-SETUP_DIR=$1
+# variables
+SETUP_DIR=""
+
+
+# Use RLIBS for setup dir
+arr=(`Rscript -e '.libPaths()' | gawk '{printf "%s ",$2}'`)
+for ix in ${!arr[*]};
+do
+    if [ -d "${arr[$ix]}" ] && [ -w "${arr[$ix]}" ]
+    then
+        SETUP_DIR="${arr[$ix]}/exageostat"
+    fi
+done
+if [ $SETUP_DIR == "" ]
+then
+    echo "Check your .libPaths() in R. Could not find a writable directory."
+    exit 1;
+fi
+
+
 
 if [ $# -le 1 ]; then
 	MKL_DIR=/opt/intel/mkl
