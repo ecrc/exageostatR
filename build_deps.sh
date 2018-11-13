@@ -31,6 +31,7 @@ else
     echo "MKLROOT Directory does not exist!... Please define and export MKLROOT variable"
     exit 1
 fi
+PREFIX=$SETUP_DIR
 
 echo 'The installation directory is '$SETUP_DIR
 echo 'The mkl root directory is '$MKLROOT
@@ -63,157 +64,74 @@ export MKLROOT=$MKLROOT
 
 #*****************************************************************************
 
-#*****************************************************************************install Nlopt
-cd $SETUP_DIR
-if [ ! -d "nlopt-2.4.2" ]; then
-        wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz
-        tar -zxvf nlopt-2.4.2.tar.gz
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+if [ $CURRENT_OS == "LINUX" ]
+then
+    export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
+else
+    export DYLD_LIBRARY_PATH=$PREFIX/lib:$DYLD_LIBRARY_PATH
 fi
-cd nlopt-2.4.2
-[[ -d nlopt_install ]] || mkdir nlopt_install
-CC=gcc ./configure --prefix=$PWD/nlopt_install/ --enable-shared --without-guile
-make -j
-make -j install
-NLOPTROOT=$PWD
-export PKG_CONFIG_PATH=$NLOPTROOT/nlopt_install/lib/pkgconfig:$PKG_CONFIG_PATH
 
-if [ $CURRENT_OS == "LINUX" ]
-then
-	export LD_LIBRARY_PATH=$NLOPTROOT/nlopt_install/lib:$LD_LIBRARY_PATH
-else
-        export DYLD_LIBRARY_PATH=$NLOPTROOT/nlopt_install/lib:$DYLD_LIBRARY_PATH
-fi
+#*****************************************************************************install Nlopt
+cd /tmp
+wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz -O - | tar -zx
+cd nlopt-2.4.2
+./configure --enable-shared --without-guile --prefix=$PREFIX
+make -j || make && make install
+
+
 #*****************************************************************************install gsl
-cd $SETUP_DIR
-if [ ! -d "gsl-2.4" ]; then
-        wget https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz
-        tar -zxvf gsl-2.4.tar.gz
-fi
+cd /tmp
+wget https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz -O - | tar -zx
 cd gsl-2.4
-[[ -d gsl_install ]] || mkdir gsl_install
-CC=gcc ./configure --prefix=$PWD/gsl_install/
-make -j
-make -j install
-GSLROOT=$PWD
-export PKG_CONFIG_PATH=$GSLROOT/gsl_install/lib/pkgconfig:$PKG_CONFIG_PATH
-if [ $CURRENT_OS == "LINUX" ]
-then
-	export LD_LIBRARY_PATH=$GSLROOT/gsl_install/lib:$LD_LIBRARY_PATH
-else
-        export DYLD_LIBRARY_PATH=$GSLROOT/gsl_install/lib:$DYLD_LIBRARY_PATH
-fi
+./configure --prefix=$PREFIX
+make -j || make && make install
 
 #*****************************************************************************install hwloc
-cd $SETUP_DIR
-if [  ! -d "hwloc-1.11.5" ]; then
-        wget https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz
-        tar -zxvf hwloc-1.11.5.tar.gz
-fi
+cd /tmp
+wget https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz -O - | tar -zx
 cd hwloc-1.11.5
-[[ -d hwloc_install ]] || mkdir hwloc_install
-CC=gcc ./configure --prefix=$SETUP_DIR/hwloc-1.11.5/hwloc_install 
-make -j
-make -j install
-HWLOCROOT=$PWD
-export PKG_CONFIG_PATH=$HWLOCROOT/hwloc_install/lib/pkgconfig:$PKG_CONFIG_PATH
-if [ $CURRENT_OS == "LINUX" ]
-then
-	export LD_LIBRARY_PATH=$HWLOCROOT/hwloc_install/lib:$LD_LIBRARY_PATH
-else
-        export DYLD_LIBRARY_PATH=$HWLOCROOT/hwloc_install/lib:$DYLD_LIBRARY_PATH
-fi	
+./configure --prefix=$PREFIX
+make -j || make && make install
+
 #*****************************************************************************install Starpu
-cd $SETUP_DIR
-if [ ! -d "starpu-1.2.1" ]; then
-        wget http://starpu.gforge.inria.fr/files/starpu-1.2.1/starpu-1.2.1.tar.gz
-        tar -zxvf starpu-1.2.1.tar.gz
-fi
-cd starpu-1.2.1
-[[ -d starpu_install ]] || mkdir starpu_install
- ./configure --prefix=$SETUP_DIR/starpu-1.2.1/starpu_install  -disable-cuda -disable-mpi --disable-opencl
-make -j
-make -j  install
-STARPUROOT=$PWD
-export PKG_CONFIG_PATH=$STARPUROOT/starpu_install/lib/pkgconfig:$PKG_CONFIG_PATH
+cd /tmp
+wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz
+tar -zxvf starpu-1.2.5.tar.gz
+cd starpu-1.2.5
+./configure -disable-cuda -disable-mpi --disable-opencl --prefix=$PREFIX
+make -j || make && make install
 
-if [ $CURRENT_OS == "LINUX" ]
-then
-	export LD_LIBRARY_PATH=$STARPUROOT/starpu_install/lib:$LD_LIBRARY_PATH
-else
-        export DYLD_LIBRARY_PATH=$STARPUROOT/starpu_install/lib:$DYLD_LIBRARY_PATH
-fi
 #************************************************************************ Install Chameleon - Stars-H - HiCMA 
-cd $SETUP_DIR
-# Check if we are already in exageostat repo dir or not.
-if git -C $PWD remote -v | grep -q 'https://github.com/ecrc/exageostat-dev'
-then
-        # we are, lets go to the top dir (where .git is)
-        until test -d $PWD/.git ;
-        do
-                cd ..
-        done;
-else
-        git clone https://github.com/ecrc/exageostat-dev
-        cd exageostat-dev
-fi
-git submodule init
-git submodule update
-EXAGEOSTATROOT=$PWD
-
-cd hicma-dev
-HICMAROOT=$PWD
-git submodule init
-git submodule update
-############################# Chameleon Installation
+cd /tmp && rm -rf /tmp/exageostatR
+git clone https://github.com/ecrc/exageostatR.git
+cd exageostatR
+git submodule update --init --recursive
+cd src
+cd hicma
 cd chameleon
-CHAMELEONROOT=$PWD
-git submodule init
-git submodule update
-mkdir -p build/installdir
-cd build
-CC=gcc cmake .. -DCMAKE_BUILD_TYPE=Debug -DCHAMELEON_USE_MPI=OFF -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DBUILD_SHARED_LIBS=ON
-make -j
+mkdir -p build && cd build
+cmake .. -DCHAMELEON_USE_MPI=OFF -DBUILD_SHARED_LIBS=ON -DCBLAS_DIR="${MKLROOT}" -DLAPACKE_DIR="${MKLROOT}" -DBLAS_LIBRARIES="-L${MKLROOT}/lib/intel64;-lmkl_intel_lp64;-lmkl_core;-lmkl_sequential;-lpthread;-lm;-ldl"
+make -j || make && make install
+cd /tmp
+cd exageostatR && cd src
+cd stars-h
+mkdir -p build && cd build
+cmake .. -DCMAKE_C_FLAGS=-fPIC -DMPI=OFF
+make -j || make && make install
+cd /tmp
+cd exageostatR && cd src
+cd hicma
+mkdir -p build && cd build
+cmake .. -DBUILD_SHARED_LIBS=ON
+make -j || make && make install
+cd /tmp
+cd exageostatR && cd src
+mkdir -p build && cd build
+export CPATH=$CPATH:/tmp/exageostatR/src/hicma/chameleon/coreblas/include/coreblas
+cmake ..
+make -j >/dev/null 2>&1 || make VERBOSE=1
 make install
-export PKG_CONFIG_PATH=$CHAMELEONROOT/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
-if [ $CURRENT_OS == "LINUX" ]
-then
-        export LD_LIBRARY_PATH=$CHAMELEONROOT/build/installdir/lib:$LD_LIBRARY_PATH
-else
-        export DYLD_LIBRARY_PATH=$CHAMELEONROOT/build/installdir/lib:$DYLD_LIBRARY_PATH
-fi
-############################# Stars-H Installation
-cd $EXAGEOSTATROOT
-cd stars-h-dev
-git submodule init
-git submodule update
-STARSHROOT=$PWD
-mkdir -p build/installdir
-cd build
-CC=gcc cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/installdir/ -DCMAKE_C_FLAGS=-fPIC
-make -j
-make install
-export PKG_CONFIG_PATH=$STARSHROOT/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
-if [ $CURRENT_OS == "LINUX" ]
-then
-        export LD_LIBRARY_PATH=$STARSHROOT/build/installdir/lib:$LD_LIBRARY_PATH
-else
-        export DYLD_LIBRARY_PATH=$STARSHROOT/build/installdir/lib:$DYLD_LIBRARY_PATH
-fi
-############################# HiCMA Installation
-cd $HICMAROOT
-mkdir -p build/installdir
-cd build
-CC=gcc cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DHICMA_USE_MPI=OFF -DCMAKE_C_FLAGS=-fPIC
-make -j
-make install
-export PKG_CONFIG_PATH=$HICMAROOT/build/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
-if [ $CURRENT_OS == "LINUX" ]
-then
-        export LD_LIBRARY_PATH=$HICMAROOT/build/installdir/lib:$LD_LIBRARY_PATH
-else
-        export DYLD_LIBRARY_PATH=$HICMAROOT/build/installdir/lib:$DYLD_LIBRARY_PATH
-fi
-##################################################################################
 
 
 
