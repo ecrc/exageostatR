@@ -103,19 +103,6 @@ else
         export DYLD_LIBRARY_PATH=$GSLROOT/gsl_install/lib:$DYLD_LIBRARY_PATH
 fi
 
-#*****************************************************************************install cmake
-#cd $SETUP_DIR
-#if [  ! -d "cmake-3.10.0-rc3" ]; then
-#        wget https://cmake.org/files/v3.10/cmake-3.10.0-rc3.tar.gz
-#        tar -zxvf cmake-3.10.0-rc3.tar.gz
-#fi
-#cd cmake-3.10.0-rc3
-#[[ -d cmake_install ]] || mkdir cmake_install
-#CC=gcc ./configure --prefix=$SETUP_DIR/cmake-3.10.0-rc3/cmake_install
-#make -j
-#make -j install
-#CMAKEROOT=$PWD
-#export PATH=$PWD/cmake_install/bin/:$PATH
 #*****************************************************************************install hwloc
 cd $SETUP_DIR
 if [  ! -d "hwloc-1.11.5" ]; then
@@ -227,25 +214,6 @@ else
         export DYLD_LIBRARY_PATH=$HICMAROOT/build/installdir/lib:$DYLD_LIBRARY_PATH
 fi
 ##################################################################################
-#cd $EXAGEOSTATDEVDIR
-#rm -rf build
-#mkdir -p build
-#cd build
-#cmake .. \
-#    -DCMAKE_INSTALL_PREFIX=$PWD/installdir \
-#    -DEXAGEOSTAT_SCHED_STARPU=ON \
-#    -DEXAGEOSTAT_USE_MPI=OFF \
-#    -DEXAGEOSTAT_PACKAGE=ON \
-#    -DCMAKE_BUILD_TYPE=Release \
-
-#on Shaheen
-#cmake ..  -DCMAKE_CXX_COMPILER=CC -DCMAKE_C_COMPILER=cc -DCMAKE_Fortran_COMPILER=ftn    -DCMAKE_INSTALL_PREFIX=$PWD/installdir     -DEXAGEOSTAT_SCHED_STARPU=ON     -DEXAGEOSTAT_USE_MPI=ON     -DEXAGEOSTAT_PACKAGE=ON -DMPI_C_LIBRARIES=/opt/cray/mpt/7.2.6/gni/mpich-intel/14.0/lib -DMPI_C_INCLUDE_PATH=/opt/cray/mpt/7.2.6/gni/mpich-intel/14.0/include/
-
-#make clean
-#make -j || make VERBOSE=1
-#make install
-##########################################################################################
-#STARPU_SILENT=1  numactl --interleave=all ./examples/zgen_mle_test --test --N=1600 --ts=960 --ncores=35  --computation=exact  --kernel=?:?:? --ikernel=1:0.1:0.5  --olb=0.01:0.01:0.01  --oub=5:5:5 --zvecs=1 --predict=50 
 
 
 
