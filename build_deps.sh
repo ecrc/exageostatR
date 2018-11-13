@@ -1,9 +1,5 @@
 #!/bin/bash
-#At least one argument should be passed to the script
-if [ $# -le 0 ]; then
-	echo "At least one argument should be provided to the script as the first arg (i.e., install-cpu INSTALLATION_DIR)\n"     
-	exit 1
-fi
+
 
 # variables
 SETUP_DIR=""
@@ -11,14 +7,17 @@ SETUP_DIR=""
 
 # Use RLIBS for setup dir
 arr=(`Rscript -e '.libPaths()' | gawk '{printf "%s ",$2}'`)
-for ix in ${!arr[*]};
+for i in ${!arr[*]};
 do
-    if [ -d "${arr[$ix]}" ] && [ -w "${arr[$ix]}" ]
+    dir=`echo ${arr[$i]}|tr -d \"`
+    if [ -d "$dir" ] && [ -w "$dir" ]
     then
-        SETUP_DIR="${arr[$ix]}/exageostat"
+        SETUP_DIR="$dir/exageostat"
+        break
     fi
 done
-if [ $SETUP_DIR == "" ]
+
+if [ -z "$SETUP_DIR" ]
 then
     echo "Check your .libPaths() in R. Could not find a writable directory."
     exit 1;
@@ -35,6 +34,7 @@ PREFIX=$SETUP_DIR
 
 echo 'The installation directory is '$SETUP_DIR
 echo 'The mkl root directory is '$MKLROOT
+
 ############################## Check OS
 echo "Finding the current os type"
 echo
