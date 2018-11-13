@@ -24,26 +24,16 @@ then
     exit 1;
 fi
 
-
-
-if [ $# -le 1 ]; then
-	MKL_DIR=/opt/intel/mkl
-        echo "The default MKL path is used (MKL_DIR=/opt/intel/mkl)\n"
+if [ -n "$MKLROOT" ] && [ -d "$MKLROOT" ]; then
+    echo "mkl_dir directory exists!"
+    echo "Great... continue set-up"
 else
-    MKL_DIR=$2
-fi
-
-if [ -d "$MKL_DIR" ]; then
-        echo "mkl_dir directory exists!"
-        echo "Great... continue set-up"
-else
-        echo "MKL Directory does not exist!... Please provide it to the installation file as a second arg (i.e., install-cpu.sh INSTALLATION_DIR  MKL_INSTALLATION_DIR)"
-        echo $MKL_DIR
-        exit 1
+    echo "MKLROOT Directory does not exist!... Please define and export MKLROOT variable"
+    exit 1
 fi
 
 echo 'The installation directory is '$SETUP_DIR
-echo 'The mkl root directory is '$MKL_DIR
+echo 'The mkl root directory is '$MKLROOT
 ############################## Check OS
 echo "Finding the current os type"
 echo
@@ -68,7 +58,7 @@ case "$osType" in
 esac
 
 #################################################
-export MKLROOT=$MKL_DIR
+export MKLROOT=$MKLROOT
 . $MKLROOT/bin/mklvars.sh intel64
 
 #***************************************************************************** clean bashrc from previous installation
@@ -245,8 +235,8 @@ echo '## EXAGEOSTAT-INSTALLATION-BEGIN' >> ~/.bashrc
 #*****************************************************************************source intel MKL
 #MKL
 echo '. '$MKLROOT'/bin/mklvars.sh intel64' >> ~/.bashrc
-echo 'export MKLROOT='$MKL_DIR >> ~/.bashrc
-echo 'export LD_PRELOAD='$MKL_DIR'/lib/intel64/libmkl_core.so:'$MKL_DIR'/lib/intel64/libmkl_sequential.so' >> ~/.bashrc
+echo 'export MKLROOT='$MKLROOT >> ~/.bashrc
+echo 'export LD_PRELOAD='$MKLROOT'/lib/intel64/libmkl_core.so:'$MKLROOT'/lib/intel64/libmkl_sequential.so' >> ~/.bashrc
 
 #NLOPT
 echo 'export PKG_CONFIG_PATH='$NLOPTROOT'/nlopt_install/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
