@@ -24,6 +24,7 @@ else
     echo ""
     err=1
 fi
+
 # CHAMELEON
 if pkg-config --exists chameleon
 then
@@ -37,6 +38,7 @@ else
     echo ""
     err=1
 fi
+
 # nlopt
 if pkg-config --exists nlopt
 then
@@ -51,11 +53,6 @@ else
     err=1
 fi
 
-if [ $err -gt 0 ]
-then
-    exit 1
-fi
-
 # starsh
 if pkg-config --exists hicma
 then
@@ -68,11 +65,6 @@ else
     echo "After installing it, set the proper PKG_CONFIG_PATH variable"
     echo ""
     err=1
-fi
-
-if [ $err -gt 0 ]
-then
-    exit 1
 fi
 
 # nlopt
@@ -93,16 +85,4 @@ if [ $err -gt 0 ]
 then
     exit 1
 fi
-# Remove cached files
-#rm -rf CMakeFiles CMakeCache.txt
-
-# Generate makefiles
-#cmake ./src -DBUILD_SHARED_LIBS=ON
-
-# Dummy makefile in src to trigger real one from cmake.
-#cat > src/Makefile << EOF
-#.PHONY: all clean
-#all:
-#    (cd .. && make && cp ./lib*.so ./src/exageostat.so)
-
 #EOF
