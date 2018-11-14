@@ -133,20 +133,20 @@ cd src
 cd hicma
 cd chameleon
 mkdir -p build && cd build
-cmake .. -DCHAMELEON_USE_MPI=OFF -DBUILD_SHARED_LIBS=ON -DCBLAS_DIR="${MKLROOT}" -DLAPACKE_DIR="${MKLROOT}" -DBLAS_LIBRARIES="-L${MKLROOT}/lib/intel64;-lmkl_intel_lp64;-lmkl_core;-lmkl_sequential;-lpthread;-lm;-ldl" -DCMAKE_INSTALL_PREFIX=$PREFIX
-make -j || make && make install
+cmake .. -DCHAMELEON_USE_MPI=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$PREFIX
+make -j 20 || make VERBOSE=1 && make install
 #cd $TMPDIR
 cd $BASEDIR && cd src
 cd stars-h
 mkdir -p build && cd build
 cmake .. -DCMAKE_C_FLAGS=-fPIC -DMPI=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX
-make -j || make && make install
+make -j 20 || make VERBOSE=1 && make install
 #cd $TMPDIR
 cd $BASEDIR && cd src
 cd hicma
 mkdir -p build && cd build
 cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$PREFIX
-make -j || make && make install
+make -j 20 || make VERBOSE=1 && make install
 #cd $TMPDIR
 #cd exageostatR && cd src
 #mkdir -p build && cd build
