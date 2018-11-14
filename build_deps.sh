@@ -66,9 +66,14 @@ esac
 export MKLROOT=$MKLROOT
 . $MKLROOT/bin/mklvars.sh intel64
 
-#*****************************************************************************
+
 
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+rpaths="-Wl,-rpath=$PREFIX/lib -Wl,-rpath=$PREFIX/libs -L$PREFIX/lib "
+echo "LDFLAGS += $rpaths " >> src/Makefile
+
+#*****************************************************************************
+
 if [ $CURRENT_OS == "LINUX" ]
 then
     export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
