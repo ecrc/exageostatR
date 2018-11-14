@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/bash -x
 
 
 # variables
 BASEDIR=$PWD
 SETUP_DIR=""
-TMPDIR=$TMPDIR/_$$
+TMPDIR=/tmp/_$$
 
 mkdir -p $TMPDIR
 
@@ -38,6 +38,7 @@ else
     exit 1
 fi
 PREFIX=$SETUP_DIR
+
 
 echo 'The installation directory is '$SETUP_DIR
 echo 'The mkl root directory is '$MKLROOT
@@ -76,6 +77,7 @@ rpaths="-Wl,-rpath=$PREFIX/lib -Wl,-rpath=$PREFIX/libs -L$PREFIX/lib "
 echo "LDFLAGS += $rpaths " >> src/Makefile
 
 #*****************************************************************************
+set -e
 
 if [ $CURRENT_OS == "LINUX" ]
 then
