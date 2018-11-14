@@ -2,8 +2,11 @@
 
 
 # variables
+BASEDIR=$PWD
 SETUP_DIR=""
+TMPDIR=$TMPDIR/_$$
 
+mkdir -p $TMPDIR
 
 SETUP_DIR=$1
 if [ -z "$SETUP_DIR" ]; then
@@ -84,7 +87,7 @@ fi
 #*****************************************************************************install Nlopt
 if ! pkg-config --exists --atleast-version=2.4 nlopt
 then
-    cd /tmp
+    cd $TMPDIR
     wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz -O - | tar -zx
     cd nlopt-2.4.2
     ./configure --enable-shared --without-guile --prefix=$PREFIX
@@ -94,7 +97,7 @@ fi
 #*****************************************************************************install gsl
 if ! pkg-config --exists --atleast-version=2 gsl
 then
-    cd /tmp
+    cd $TMPDIR
     wget https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz -O - | tar -zx
     cd gsl-2.4
     ./configure --prefix=$PREFIX
@@ -103,7 +106,7 @@ fi
 #*****************************************************************************install hwloc
 if ! pkg-config --exists --atleast-version=1.11 hwloc
 then
-    cd /tmp
+    cd $TMPDIR
     wget https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz -O - | tar -zx
     cd hwloc-1.11.5
     ./configure --prefix=$PREFIX
@@ -112,7 +115,7 @@ fi
 #*****************************************************************************install Starpu
 if ! pkg-config --exists --atleast-version=1.2 libstarpu
 then
-    cd /tmp
+    cd $TMPDIR
     wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz
     tar -zxvf starpu-1.2.5.tar.gz
     cd starpu-1.2.5
@@ -120,35 +123,37 @@ then
     make -j || make && make install
 fi
 #************************************************************************ Install Chameleon - Stars-H - HiCMA 
-cd /tmp && rm -rf /tmp/exageostatR
-git clone https://github.com/ecrc/exageostatR.git
-cd exageostatR
-git submodule update --init --recursive
+#cd $TMPDIR && rm -rf $TMPDIR/exageostatR
+#git clone https://github.com/ecrc/exageostatR.git
+#cd exageostatR
+## I guess we have everything already
+cd $BASEDIR
+git submodule update --init --recursive || true
 cd src
 cd hicma
 cd chameleon
 mkdir -p build && cd build
 cmake .. -DCHAMELEON_USE_MPI=OFF -DBUILD_SHARED_LIBS=ON -DCBLAS_DIR="${MKLROOT}" -DLAPACKE_DIR="${MKLROOT}" -DBLAS_LIBRARIES="-L${MKLROOT}/lib/intel64;-lmkl_intel_lp64;-lmkl_core;-lmkl_sequential;-lpthread;-lm;-ldl" -DCMAKE_INSTALL_PREFIX=$PREFIX
 make -j || make && make install
-cd /tmp
+cd $TMPDIR
 cd exageostatR && cd src
 cd stars-h
 mkdir -p build && cd build
 cmake .. -DCMAKE_C_FLAGS=-fPIC -DMPI=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX
 make -j || make && make install
-cd /tmp
+cd $TMPDIR
 cd exageostatR && cd src
 cd hicma
 mkdir -p build && cd build
 cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$PREFIX
 make -j || make && make install
-#cd /tmp
+#cd $TMPDIR
 #cd exageostatR && cd src
 #mkdir -p build && cd build
-#export CPATH=$CPATH:/tmp/exageostatR/src/hicma/chameleon/coreblas/include/coreblas
+#export CPATH=$CPATH:$TMPDIR/exageostatR/src/hicma/chameleon/coreblas/include/coreblas
 #cmake ..
 #make -j >/dev/null 2>&1 || make VERBOSE=1
 #make install
 
-
+rm -rf $TMPDIR
 
