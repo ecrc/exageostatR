@@ -83,7 +83,7 @@ then
 fi
 
 #*****************************************************************************install gsl
-if ! pkg-config --exists --atleast-version=2.4 gsl
+if ! pkg-config --exists --atleast-version=2 gsl
 then
     cd /tmp
     wget https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz -O - | tar -zx
@@ -101,7 +101,7 @@ then
     make -j || make && make install
 fi
 #*****************************************************************************install Starpu
-if ! pkg-config --exists --atleast-version=1.2 starpu
+if ! pkg-config --exists --atleast-version=1.2 libstarpu
 then
     cd /tmp
     wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz

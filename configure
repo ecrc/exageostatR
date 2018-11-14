@@ -39,6 +39,20 @@ else
     err=1
 fi
 
+# gsl
+if pkg-config --exists gsl
+then
+    _LOCATION=`pkg-config --variable=prefix gsl`
+    echo "gsl FOUND in [$_LOCATION]"
+else
+    echo "####################"
+    echo "gsl NOT FOUND"
+    echo "Please download it from: https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz"
+    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+    echo ""
+    err=1
+fi
+
 # nlopt
 if pkg-config --exists nlopt
 then
@@ -47,13 +61,28 @@ then
 else
     echo "####################"
     echo "nlopt NOT FOUND"
-    echo "Please download it from: http://starpu.gforge.inria.fr/files/"
+    echo "Please download it from: http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz"
     echo "After installing it, set the proper PKG_CONFIG_PATH variable"
     echo ""
     err=1
 fi
 
-# starsh
+# hwloc
+if pkg-config --exists hwloc
+then
+    _LOCATION=`pkg-config --variable=prefix hwloc`
+    echo "hwloc FOUND in [$_LOCATION]"
+else
+    echo "####################"
+    echo "hwloc NOT FOUND"
+    echo "Please download it from: https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz"
+    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+    echo ""
+    err=1
+fi
+
+
+# hicma
 if pkg-config --exists hicma
 then
     _LOCATION=`pkg-config --variable=prefix hicma`
@@ -67,7 +96,7 @@ else
     err=1
 fi
 
-# nlopt
+# starsh
 if pkg-config --exists starsh
 then
     _LOCATION=`pkg-config --variable=prefix starsh`
@@ -75,7 +104,7 @@ then
 else
     echo "####################"
     echo "starsh NOT FOUND"
-    echo "Please download it from: https://github.com/ecrc/stars"
+    echo "Please download it from: https://github.com/ecrc/stars-h"
     echo "After installing it, set the proper PKG_CONFIG_PATH variable"
     echo ""
     err=1
