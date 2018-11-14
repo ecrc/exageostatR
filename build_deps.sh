@@ -5,6 +5,8 @@
 SETUP_DIR=""
 
 
+SETUP_DIR=$1
+if [ -z "$SETUP_DIR" ]; then
 # Use RLIBS for setup dir
 arr=(`Rscript -e '.libPaths()' | gawk '{printf "%s ",$2}'`)
 for i in ${!arr[*]};
@@ -16,6 +18,8 @@ do
         break
     fi
 done
+fi
+mkdir -p $SETUP_DIR
 
 if [ -z "$SETUP_DIR" ]
 then

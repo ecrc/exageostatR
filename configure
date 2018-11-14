@@ -5,12 +5,24 @@
 
 err=0
 
-# check submodules
-#git submodule update --init
-#git clone --recurse-submodules --branch v0.1.0 https://github.com/ecrc/exageostat src
+# check submodules just in case
+git submodule update --init --recursive 2>&1 >/dev/null || true
 
+### check dependencies
 
-## check dependencies
+#set pkgconfig path including possible installation dir
+arr=(`Rscript -e '.libPaths()' | gawk '{printf "%s ",$2}'`)
+for i in ${!arr[*]};
+do
+    dir=`echo ${arr[$i]}|tr -d \"`
+    if [ -d "$dir" ] && [ -w "$dir" ]
+    then
+        SETUP_DIR="$dir/exageostat"
+        break
+    fi
+done
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SETUP_DIR/lib/pkgconfig
+
 # StarPU
 if pkg-config --exists libstarpu
 then
@@ -112,6 +124,8 @@ fi
 
 if [ $err -gt 0 ]
 then
-    exit 1
+echo "##### Building dependencies...."
+sleep 5
+exec ./build_deps.sh $SETUP_DIR
 fi
 #EOF
