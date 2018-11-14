@@ -119,7 +119,7 @@ then
     wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz
     tar -zxvf starpu-1.2.5.tar.gz
     cd starpu-1.2.5
-    ./configure -disable-cuda -disable-mpi --disable-opencl --prefix=$PREFIX
+    ./configure --disable-cuda --disable-opencl --prefix=$PREFIX
     make -j || make && make install
 fi
 #************************************************************************ Install Chameleon - Stars-H - HiCMA 
