@@ -6,8 +6,13 @@
 #
 
 #VARIABLES
+BASEDIR=$(pwd)
+TMPDIR=$BASEDIR/_$$
 BUILD_DEPENDENCIES='true'
+err=0
 
+
+mkdir -p $TMPDIR
 
 print_usage() {
     echo "usage: $0 [--enable-mpi|--disable-mpi]"
@@ -45,19 +50,40 @@ do
     esac
 done
 
+############################## Check OS
+echo "Finding the current os type"
+echo
+osType=$(uname)
+case "$osType" in
+    "Darwin")
+    {
+        echo "Running on Mac OSX."
+        CURRENT_OS="OSX"
+        export DYLD_LIBRARY_PATH=$PREFIX/lib:$DYLD_LIBRARY_PATH
+    } ;;
+    "Linux")
+    {
+        echo "Running on LINUX."
+        CURRENT_OS="LINUX"
+        export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
+    } ;;
+    *)
+    {
+        echo "Unsupported OS, exiting"
+        exit
+    } ;;
+esac
 
-
-
-
-err=0
 
 # check submodules just in case
 git submodule update --init --recursive 2>&1 >/dev/null || true
 
-### check dependencies
-
-#set pkgconfig path including possible installation dir
-arr=(`Rscript -e '.libPaths()' | gawk '{printf "%s ",$2}'`)
+##### check and build dependencies
+# prepare environment
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+if [ -z "$SETUP_DIR" ]; then
+# Use RLIBS for setup dir
+arr=(`Rscript -e '.libPaths()' | awk '{printf "%s ",$2}'`)
 for i in ${!arr[*]};
 do
     dir=`echo ${arr[$i]}|tr -d \"`
@@ -67,46 +93,25 @@ do
         break
     fi
 done
+fi
+mkdir -p $SETUP_DIR
+
+if [ -z "$SETUP_DIR" ]
+then
+    echo "Check your .libPaths() in R. Could not find a writable directory."
+    exit 1;
+fi
+
+if [ -n "$MKLROOT" ] && [ -d "$MKLROOT" ]; then
+    echo "mkl_dir directory exists!"
+    echo "Great... continue set-up"
+else
+    echo "MKLROOT Directory does not exist!... Please define and export MKLROOT variable"
+    exit 1
+fi
+
+#set pkgconfig path including possible installation dir
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SETUP_DIR/lib/pkgconfig
-
-# StarPU
-if pkg-config --exists --atleast-version=1.2 libstarpu
-then
-    _LOCATION=`pkg-config --variable=prefix libstarpu`
-    echo "StarPU FOUND in [$_LOCATION]"
-else
-    if [ "$BUILD_DEPENDENCIES" == "true" ]
-    then
-        echo "Building StarPU..."
-        cd $TMPDIR
-        wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz
-        tar -zxvf starpu-1.2.5.tar.gz
-        cd starpu-1.2.5
-        ./configure --disable-cuda --disable-opencl --prefix=$PREFIX
-        make -j || make && make install
-    else
-        echo "####################"
-        echo "StarPU NOT FOUND"
-        echo "Please download it from: http://starpu.gforge.inria.fr/files/"
-        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-        echo ""
-        err=1
-    fi
-fi
-
-# CHAMELEON
-if pkg-config --exists chameleon
-then
-    _LOCATION=`pkg-config --variable=prefix chameleon`
-    echo "CHAMELEON FOUND in [$_LOCATION]"
-else
-    echo "####################"
-    echo "CHAMELEON NOT FOUND"
-    echo "Please download it from: https://gitlab.inria.fr/solverstack/chameleon.git"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
-fi
 
 # gsl
 if pkg-config --exists --atleast-version=2 gsl
@@ -180,43 +185,115 @@ else
     fi
 fi
 
-
-# hicma
-if pkg-config --exists hicma
+# StarPU
+if pkg-config --exists --atleast-version=1.2 libstarpu
 then
-    _LOCATION=`pkg-config --variable=prefix hicma`
-    echo "hicma FOUND in [$_LOCATION]"
+    _LOCATION=`pkg-config --variable=prefix libstarpu`
+    echo "StarPU FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "hicma NOT FOUND"
-    echo "Please download it from: https://github.com/ecrc/hicma"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building StarPU..."
+        cd $TMPDIR
+        wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz
+        tar -zxvf starpu-1.2.5.tar.gz
+        cd starpu-1.2.5
+        ./configure --disable-cuda --disable-opencl --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "StarPU NOT FOUND"
+        echo "Please download it from: http://starpu.gforge.inria.fr/files/"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
+fi
+
+cd $BASEDIR
+
+# CHAMELEON
+if pkg-config --exists chameleon
+then
+    _LOCATION=`pkg-config --variable=prefix chameleon`
+    echo "CHAMELEON FOUND in [$_LOCATION]"
+else
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building CHAMELEON..."
+        cd $BASEDIR/src/hicma/chameleon
+        mkdir -p build && cd build
+        cmake .. -DCHAMELEON_USE_MPI=$MPIVALUE -DCHAMELEON_ENABLE_EXAMPLE=OFF -DCHAMELEON_ENABLE_TESTING=OFF -DCHAMELEON_ENABLE_TIMING=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$PREFIX
+        make -j 20 || make VERBOSE=1 && make install
+    else
+        echo "####################"
+        echo "CHAMELEON NOT FOUND"
+        echo "Please download it from: https://gitlab.inria.fr/solverstack/chameleon.git"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
 
 # starsh
-if pkg-config --exists starsh
+if pkg-config --exists --atleast-version=0.1.1 starsh
 then
     _LOCATION=`pkg-config --variable=prefix starsh`
     echo "starsh FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "starsh NOT FOUND"
-    echo "Please download it from: https://github.com/ecrc/stars-h"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building STARS-H..."
+        cd $BASEDIR/src/stars-h
+        mkdir -p build && cd build
+        cmake .. -DCMAKE_C_FLAGS=-fPIC -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX
+        make -j 20 || make VERBOSE=1 && make install
+    else
+        echo "####################"
+        echo "starsh NOT FOUND"
+        echo "Please download it from: https://github.com/ecrc/stars-h"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
 
-if [ $err -gt 0 ]
+# hicma
+if pkg-config --exists --atleast-version=0.1.1 hicma
 then
-echo "##### Building dependencies...."
-sleep 5
-exec ./build_deps.sh $SETUP_DIR
+    _LOCATION=`pkg-config --variable=prefix hicma`
+    echo "hicma FOUND in [$_LOCATION]"
+else
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building HiCMA..."
+        cd $BASEDIR/src/hicma/
+        mkdir -p build && cd build
+        cmake .. -DHICMA_USE_MPI=$MPIVALUE -DBUILD_SHARED_LIBS=ON -DHICMA_ENABLE_TESTING=OFF -DHICMA_ENABLE_TIMING=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX
+        make -j 20 || make VERBOSE=1 && make install
+    else
+        echo "####################"
+        echo "hicma NOT FOUND"
+        echo "Please download it from: https://github.com/ecrc/hicma"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
+fi
 
-#EOF
+# use rpaths in makefile
+# TODO use a R defined value por PREFIX and have this directly in the Makefile
+rpaths="-Wl,-rpath=$PREFIX/lib -Wl,-rpath=$PREFIX/libs -L$PREFIX/lib "
+echo "LDFLAGS += $rpaths " >> $BASEDIR/src/Makefile
 
+
+exit $err
+echo "##########################################################################################################"
+echo "##########################################################################################################"
+echo "##########################################################################################################"
+echo "##########################################################################################################"
+echo "##########################################################################################################"
+echo "##########################################################################################################"
 
 # variables
 BASEDIR=$PWD
