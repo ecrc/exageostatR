@@ -5,6 +5,50 @@
 #
 #
 
+#VARIABLES
+BUILD_DEPENDENCIES='true'
+
+
+print_usage() {
+    echo "usage: $0 [--enable-mpi|--disable-mpi]"
+}
+
+if [ ! -n "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]
+then
+    print_usage
+    exit 0;
+fi
+
+while [ -n "$1"  ]
+do
+    case "$1" in
+        --enable-mpi)
+            MPIVALUE="ON"
+            shift
+            ;;
+        --disable-mpi)
+            MPIVALUE="OFF"
+            shift
+            ;;
+        --build-deps)
+            BUILD_DEPENDENCIES='true'
+            shift
+            ;;
+        --no-build-deps)
+            BUILD_DEPENDENCIES='false'
+            shift
+            ;;
+        *)
+            print_usage
+            exit 1
+            ;;
+    esac
+done
+
+
+
+
+
 err=0
 
 # check submodules just in case
