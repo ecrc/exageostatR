@@ -18,11 +18,6 @@ print_usage() {
     echo "usage: $0 [--enable-mpi|--disable-mpi]"
 }
 
-if [ ! -n "$1" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]
-then
-    print_usage
-    exit 0;
-fi
 
 while [ -n "$1"  ]
 do
@@ -43,12 +38,39 @@ do
             BUILD_DEPENDENCIES='false'
             shift
             ;;
+        --help|-h)
+            print_usage
+            exit 0
+            ;;
         *)
             print_usage
             exit 1
             ;;
     esac
 done
+
+
+if [ -z "$SETUP_DIR" ]; then
+# Use RLIBS for setup dir
+arr=(`Rscript -e '.libPaths()' | awk '{printf "%s ",$2}'`)
+for i in ${!arr[*]};
+do
+    dir=`echo ${arr[$i]}|tr -d \"`
+    if [ -d "$dir" ] && [ -w "$dir" ]
+    then
+        SETUP_DIR="$dir/exageostat"
+        break
+    fi
+done
+fi
+mkdir -p $SETUP_DIR
+
+if [ -z "$SETUP_DIR" ]
+then
+    echo "Check your .libPaths() in R. Could not find a writable directory."
+    exit 1;
+fi
+PREFIX=$SETUP_DIR
 
 ############################## Check OS
 echo "Finding the current os type"
@@ -81,26 +103,6 @@ git submodule update --init --recursive 2>&1 >/dev/null || true
 ##### check and build dependencies
 # prepare environment
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
-if [ -z "$SETUP_DIR" ]; then
-# Use RLIBS for setup dir
-arr=(`Rscript -e '.libPaths()' | awk '{printf "%s ",$2}'`)
-for i in ${!arr[*]};
-do
-    dir=`echo ${arr[$i]}|tr -d \"`
-    if [ -d "$dir" ] && [ -w "$dir" ]
-    then
-        SETUP_DIR="$dir/exageostat"
-        break
-    fi
-done
-fi
-mkdir -p $SETUP_DIR
-
-if [ -z "$SETUP_DIR" ]
-then
-    echo "Check your .libPaths() in R. Could not find a writable directory."
-    exit 1;
-fi
 
 if [ -n "$MKLROOT" ] && [ -d "$MKLROOT" ]; then
     echo "mkl_dir directory exists!"
