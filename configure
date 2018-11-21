@@ -70,17 +70,28 @@ done
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SETUP_DIR/lib/pkgconfig
 
 # StarPU
-if pkg-config --exists libstarpu
+if pkg-config --exists --atleast-version=1.2 libstarpu
 then
     _LOCATION=`pkg-config --variable=prefix libstarpu`
     echo "StarPU FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "StarPU NOT FOUND"
-    echo "Please download it from: http://starpu.gforge.inria.fr/files/"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building StarPU..."
+        cd $TMPDIR
+        wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz
+        tar -zxvf starpu-1.2.5.tar.gz
+        cd starpu-1.2.5
+        ./configure --disable-cuda --disable-opencl --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "StarPU NOT FOUND"
+        echo "Please download it from: http://starpu.gforge.inria.fr/files/"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
 
 # CHAMELEON
@@ -98,31 +109,51 @@ else
 fi
 
 # gsl
-if pkg-config --exists gsl
+if pkg-config --exists --atleast-version=2 gsl
 then
     _LOCATION=`pkg-config --variable=prefix gsl`
     echo "gsl FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "gsl NOT FOUND"
-    echo "Please download it from: https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building GSL..."
+        cd $TMPDIR
+        wget https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz -O - | tar -zx
+        cd gsl-2.4
+        ./configure --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "gsl NOT FOUND"
+        echo "Please download it from: https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
 
 # nlopt
-if pkg-config --exists nlopt
+if pkg-config --exists --atleast-version=2.4 nlopt
 then
     _LOCATION=`pkg-config --variable=prefix nlopt`
     echo "nlopt FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "nlopt NOT FOUND"
-    echo "Please download it from: http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building NLOPT..."
+        cd $TMPDIR
+        wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz -O - | tar -zx
+        cd nlopt-2.4.2
+        ./configure --enable-shared --without-guile --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "nlopt NOT FOUND"
+        echo "Please download it from: http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
 
 # hwloc
@@ -131,12 +162,22 @@ then
     _LOCATION=`pkg-config --variable=prefix hwloc`
     echo "hwloc FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "hwloc NOT FOUND"
-    echo "Please download it from: https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building Hwloc..."
+        cd $TMPDIR
+        wget https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz -O - | tar -zx
+        cd hwloc-1.11.5
+        ./configure --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "hwloc NOT FOUND"
+        echo "Please download it from: https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
 
 
