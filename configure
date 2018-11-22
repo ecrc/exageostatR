@@ -14,8 +14,10 @@ err=0
 
 mkdir -p $TMPDIR
 
+SETUP_DIR=${R_PACKAGE_DIR:-''}
+
 print_usage() {
-    echo "usage: $0 [--enable-mpi|--disable-mpi]"
+    echo "usage: $0 [--enable-mpi|--disable-mpi] [--prefix /path/to/install]"
 }
 
 
@@ -36,6 +38,14 @@ do
             ;;
         --no-build-deps)
             BUILD_DEPENDENCIES='false'
+            shift
+            ;;
+        --prefix)
+            shift
+            SETUP_DIR=$1
+            # Set this paths as rpath during compilation
+            rpaths="-Wl,-rpath=$SETUP_DIR/lib -L$SETUP_DIR/lib "
+            echo "LDFLAGS += $rpaths " >> $BASEDIR/src/Makefile
             shift
             ;;
         --help|-h)
@@ -285,8 +295,7 @@ fi
 
 # use rpaths in makefile
 # TODO use a R defined value por PREFIX and have this directly in the Makefile
-rpaths="-Wl,-rpath=$PREFIX/lib -Wl,-rpath=$PREFIX/libs -L$PREFIX/lib "
-echo "LDFLAGS += $rpaths " >> $BASEDIR/src/Makefile
+
 
 
 exit $err
