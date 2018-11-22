@@ -207,8 +207,7 @@ else
     then
         echo "Building StarPU..."
         cd $TMPDIR
-        wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz
-        tar -zxvf starpu-1.2.5.tar.gz
+        wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz -O - | tar -zx
         cd starpu-1.2.5
         ./configure --disable-cuda --disable-opencl --prefix=$PREFIX
         make -j || make && make install
