@@ -117,13 +117,42 @@ export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
 if [ -n "$MKLROOT" ] && [ -d "$MKLROOT" ]; then
     echo "mkl_dir directory exists!"
     echo "Great... continue set-up"
+    XFLAG="-DBLA_VENDOR=Intel"
 else
-    echo "MKLROOT Directory does not exist!... Please define and export MKLROOT variable"
-    exit 1
+    echo "MKL not found, trying to compile and use OpenBLAS"
+    XFLAG="-DBLA_VENDOR=Open"
+    USE_OPENBLAS='true'
 fi
 
 #set pkgconfig path including possible installation dir
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SETUP_DIR/lib/pkgconfig
+
+# openblas
+if [ "true" == "$USE_OPENBLAS" ]
+then
+    if pkg-config --exists openblas
+    then
+        _LOCATION=`pkg-config --variable=libdir openblas`
+        echo "OpenBLAS FOUND in [$_LOCATION]"
+    else
+        if [ "$BUILD_DEPENDENCIES" == "true" ]
+        then
+            echo "Building OpenBLAS..."
+            cd $TMPDIR
+            wget https://github.com/xianyi/OpenBLAS/archive/v0.3.3.tar.gz -O - | tar -zx
+            cd OpenBLAS-0.3.3
+            make -j  >/dev/null|| make && make install PREFIX=$PREFIX
+            export CPATH=$CPATH:$PREFIX/include
+        else
+            echo "####################"
+            echo "OpenBLAS NOT FOUND"
+            echo "Please download it from: https://github.com/xianyi/OpenBLAS/releases"
+            echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+            echo ""
+            err=1
+        fi
+    fi
+fi
 
 # gsl
 if pkg-config --exists --atleast-version=2 gsl
