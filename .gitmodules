@@ -1,4 +1,4 @@
 [submodule "src"]
 	path = src
 	url = https://github.com/SAbdulah/exageostat.git
-	branch = egonzalf/update-install-method
+	branch = egonzalf/try-openblas
