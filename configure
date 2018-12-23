@@ -1,108 +1,329 @@
+#!/bin/bash
+
 # Configure script for R package generation
 #
 #
 #
 
+#VARIABLES
+BASEDIR=$(pwd)
+TMPDIR=$BASEDIR/_$$
+BUILD_DEPENDENCIES='true'
 err=0
 
-# check submodules
-#git submodule update --init
-#git clone --recurse-submodules --branch v0.1.0 https://github.com/ecrc/exageostat src
+
+mkdir -p $TMPDIR
+
+SETUP_DIR=${R_PACKAGE_DIR:-''}
+
+print_usage() {
+    echo "usage: $0 [--enable-mpi|--disable-mpi] [--prefix /path/to/install]"
+}
 
 
-## check dependencies
+while [ -n "$1"  ]
+do
+    case "$1" in
+        --enable-mpi)
+            MPIVALUE="ON"
+            shift
+            ;;
+        --disable-mpi)
+            MPIVALUE="OFF"
+            shift
+            ;;
+        --build-deps)
+            BUILD_DEPENDENCIES='true'
+            shift
+            ;;
+        --no-build-deps)
+            BUILD_DEPENDENCIES='false'
+            shift
+            ;;
+        --prefix)
+            shift
+            SETUP_DIR=$1
+            # Set this paths as rpath during compilation
+            rpaths="-Wl,-rpath=$SETUP_DIR/lib -L$SETUP_DIR/lib "
+            echo "LDFLAGS += $rpaths " >> $BASEDIR/src/Makefile
+            shift
+            ;;
+        --help|-h)
+            print_usage
+            exit 0
+            ;;
+        *)
+            print_usage
+            exit 1
+            ;;
+    esac
+done
+
+
+if [ -z "$SETUP_DIR" ]; then
+# Use RLIBS for setup dir
+arr=(`Rscript -e '.libPaths()' | awk '{printf "%s ",$2}'`)
+for i in ${!arr[*]};
+do
+    dir=`echo ${arr[$i]}|tr -d \"`
+    if [ -d "$dir" ] && [ -w "$dir" ]
+    then
+        SETUP_DIR="$dir/exageostat"
+        break
+    fi
+done
+fi
+mkdir -p $SETUP_DIR
+
+if [ -z "$SETUP_DIR" ]
+then
+    echo "Check your .libPaths() in R. Could not find a writable directory."
+    exit 1;
+fi
+PREFIX=$SETUP_DIR
+
+############################## Check OS
+echo "Finding the current os type"
+echo
+osType=$(uname)
+case "$osType" in
+    "Darwin")
+    {
+        echo "Running on Mac OSX."
+        CURRENT_OS="OSX"
+        export DYLD_LIBRARY_PATH=$PREFIX/lib:$DYLD_LIBRARY_PATH
+    } ;;
+    "Linux")
+    {
+        echo "Running on LINUX."
+        CURRENT_OS="LINUX"
+        export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
+    } ;;
+    *)
+    {
+        echo "Unsupported OS, exiting"
+        exit
+    } ;;
+esac
+
+
+# check submodules just in case
+git submodule update --init --recursive 2>&1 >/dev/null || true
+
+##### check and build dependencies
+# prepare environment
+export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+
+if [ -n "$MKLROOT" ] && [ -d "$MKLROOT" ]; then
+    echo "mkl_dir directory exists!"
+    echo "Great... continue set-up"
+    XFLAG="-DBLA_VENDOR=Intel"
+else
+    echo "MKL not found, trying to compile and use OpenBLAS"
+    XFLAG="-DBLA_VENDOR=Open"
+    USE_OPENBLAS='true'
+fi
+
+#set pkgconfig path including possible installation dir
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SETUP_DIR/lib/pkgconfig
+
+# openblas
+if [ "true" == "$USE_OPENBLAS" ]
+then
+    if pkg-config --exists openblas
+    then
+        _LOCATION=`pkg-config --variable=libdir openblas`
+        echo "OpenBLAS FOUND in [$_LOCATION]"
+    else
+        if [ "$BUILD_DEPENDENCIES" == "true" ]
+        then
+            echo "Building OpenBLAS..."
+            cd $TMPDIR
+            wget https://github.com/xianyi/OpenBLAS/archive/v0.3.3.tar.gz -O - | tar -zx
+            cd OpenBLAS-0.3.3
+            make -j  >/dev/null|| make && make install PREFIX=$PREFIX
+            export CPATH=$CPATH:$PREFIX/include
+        else
+            echo "####################"
+            echo "OpenBLAS NOT FOUND"
+            echo "Please download it from: https://github.com/xianyi/OpenBLAS/releases"
+            echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+            echo ""
+            err=1
+        fi
+    fi
+fi
+
+# gsl
+if pkg-config --exists --atleast-version=2 gsl
+then
+    _LOCATION=`pkg-config --variable=prefix gsl`
+    echo "gsl FOUND in [$_LOCATION]"
+else
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building GSL..."
+        cd $TMPDIR
+        wget https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz -O - | tar -zx
+        cd gsl-2.4
+        ./configure --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "gsl NOT FOUND"
+        echo "Please download it from: https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
+fi
+
+# nlopt
+if pkg-config --exists --atleast-version=2.4 nlopt
+then
+    _LOCATION=`pkg-config --variable=prefix nlopt`
+    echo "nlopt FOUND in [$_LOCATION]"
+else
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building NLOPT..."
+        cd $TMPDIR
+        wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz -O - | tar -zx
+        cd nlopt-2.4.2
+        ./configure --enable-shared --without-guile --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "nlopt NOT FOUND"
+        echo "Please download it from: http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
+fi
+
+# hwloc
+if pkg-config --exists hwloc
+then
+    _LOCATION=`pkg-config --variable=prefix hwloc`
+    echo "hwloc FOUND in [$_LOCATION]"
+else
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building Hwloc..."
+        cd $TMPDIR
+        wget https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz -O - | tar -zx
+        cd hwloc-1.11.5
+        ./configure --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "hwloc NOT FOUND"
+        echo "Please download it from: https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
+fi
+
 # StarPU
-if pkg-config --exists libstarpu
+if pkg-config --exists --atleast-version=1.2 libstarpu
 then
     _LOCATION=`pkg-config --variable=prefix libstarpu`
     echo "StarPU FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "StarPU NOT FOUND"
-    echo "Please download it from: http://starpu.gforge.inria.fr/files/"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building StarPU..."
+        cd $TMPDIR
+        wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz -O - | tar -zx
+        cd starpu-1.2.5
+        ./configure --disable-cuda --disable-opencl --prefix=$PREFIX
+        make -j || make && make install
+    else
+        echo "####################"
+        echo "StarPU NOT FOUND"
+        echo "Please download it from: http://starpu.gforge.inria.fr/files/"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
+
+cd $BASEDIR
+
 # CHAMELEON
 if pkg-config --exists chameleon
 then
     _LOCATION=`pkg-config --variable=prefix chameleon`
     echo "CHAMELEON FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "CHAMELEON NOT FOUND"
-    echo "Please download it from: https://gitlab.inria.fr/solverstack/chameleon.git"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
-fi
-# nlopt
-if pkg-config --exists nlopt
-then
-    _LOCATION=`pkg-config --variable=prefix nlopt`
-    echo "nlopt FOUND in [$_LOCATION]"
-else
-    echo "####################"
-    echo "nlopt NOT FOUND"
-    echo "Please download it from: http://starpu.gforge.inria.fr/files/"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
-fi
-
-if [ $err -gt 0 ]
-then
-    exit 1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building CHAMELEON..."
+        cd $BASEDIR/src/hicma/chameleon
+        mkdir -p build && cd build
+        cmake .. -DCHAMELEON_USE_MPI=$MPIVALUE -DCHAMELEON_ENABLE_EXAMPLE=OFF -DCHAMELEON_ENABLE_TESTING=OFF -DCHAMELEON_ENABLE_TIMING=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$PREFIX
+        make -j 20 || make VERBOSE=1 && make install
+    else
+        echo "####################"
+        echo "CHAMELEON NOT FOUND"
+        echo "Please download it from: https://gitlab.inria.fr/solverstack/chameleon.git"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
 
 # starsh
-if pkg-config --exists hicma
-then
-    _LOCATION=`pkg-config --variable=prefix hicma`
-    echo "hicma FOUND in [$_LOCATION]"
-else
-    echo "####################"
-    echo "hicma NOT FOUND"
-    echo "Please download it from: https://github.com/ecrc/hicma"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
-fi
-
-if [ $err -gt 0 ]
-then
-    exit 1
-fi
-
-# nlopt
-if pkg-config --exists starsh
+if pkg-config --exists --atleast-version=0.1.1 starsh
 then
     _LOCATION=`pkg-config --variable=prefix starsh`
     echo "starsh FOUND in [$_LOCATION]"
 else
-    echo "####################"
-    echo "starsh NOT FOUND"
-    echo "Please download it from: https://github.com/ecrc/stars"
-    echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-    echo ""
-    err=1
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building STARS-H..."
+        cd $BASEDIR/src/stars-h
+        mkdir -p build && cd build
+        cmake .. -DCMAKE_C_FLAGS=-fPIC -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX
+        make -j 20 || make VERBOSE=1 && make install
+    else
+        echo "####################"
+        echo "starsh NOT FOUND"
+        echo "Please download it from: https://github.com/ecrc/stars-h"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
 
-if [ $err -gt 0 ]
+# hicma
+if pkg-config --exists --atleast-version=0.1.1 hicma
 then
-    exit 1
+    _LOCATION=`pkg-config --variable=prefix hicma`
+    echo "hicma FOUND in [$_LOCATION]"
+else
+    if [ "$BUILD_DEPENDENCIES" == "true" ]
+    then
+        echo "Building HiCMA..."
+        cd $BASEDIR/src/hicma/
+        mkdir -p build && cd build
+        cmake .. -DHICMA_USE_MPI=$MPIVALUE -DBUILD_SHARED_LIBS=ON -DHICMA_ENABLE_TESTING=OFF -DHICMA_ENABLE_TIMING=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX
+        make -j 20 || make VERBOSE=1 && make install
+    else
+        echo "####################"
+        echo "hicma NOT FOUND"
+        echo "Please download it from: https://github.com/ecrc/hicma"
+        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+        echo ""
+        err=1
+    fi
 fi
-# Remove cached files
-#rm -rf CMakeFiles CMakeCache.txt
 
-# Generate makefiles
-#cmake ./src -DBUILD_SHARED_LIBS=ON
+# use rpaths in makefile
+# TODO use a R defined value por PREFIX and have this directly in the Makefile
 
-# Dummy makefile in src to trigger real one from cmake.
-#cat > src/Makefile << EOF
-#.PHONY: all clean
-#all:
-#    (cd .. && make && cp ./lib*.so ./src/exageostat.so)
 
-#EOF
+
+exit $err
