@@ -1,12 +1,12 @@
-\name{exageostat_dstmleR}
-\alias{exageostat_dstmleR}
+\name{dst_mle}
+\alias{dst_mle}
 \title{ Sets up the call to the mle_dst() C language function accessed via the  R '.C' external function call API }
 \description{
-  \code{exageostat_dstmleR} demonstrates the R / C language interface
+  \code{dst_mle} demonstrates the R / C language interface
 }
 
 \usage{
-exageostat_dstmleR(n,
+dst_mle(n,
 		ncores,
 		gpus,
 		ts,

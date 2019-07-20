@@ -1,12 +1,12 @@
-\name{exageostat_emleR}
-\alias{exageostat_emleR}
+\name{exact_mle}
+\alias{exact_mle}
 \title{ Sets up the call to the mle_exact() C language function accessed via the  R '.C' external function call API }
 \description{
-  \code{exageostat_emleR} demonstrates the R / C language interface
+  \code{exact_mle} demonstrates the R / C language interface
 }
 
 \usage{
-exageostat_emleR(n,
+exact_mle(n,
 		ncores,
 		gpus,
 		ts,

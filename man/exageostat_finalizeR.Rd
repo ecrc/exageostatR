@@ -1,12 +1,12 @@
-\name{exageostat_finalizeR}
-\alias{exageostat_finalizeR}
+\name{exageostat_finalize}
+\alias{exageostat_finalize}
 \title{ Sets up the call to the rexageostat_finalize() C language function accessed via the  R '.C' external function call API }
 \description{
   \code{exageostat_finalize} demonstrates the R / C language interface
 }
 
 \usage{
-exageostat_finalizeR()
+exageostat_finalize()
 }
 
 \arguments{

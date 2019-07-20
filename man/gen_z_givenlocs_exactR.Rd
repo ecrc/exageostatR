@@ -1,11 +1,11 @@
-\name{exageostat_egenz_glR}
-\alias{exageostat_egenz_glR}
+\name{simulate_obs_exact}
+\alias{simulate_obs_exact}
 \title{ Sets up the call to the gen_z_givenlocs_exact() C language function accessed via the  R '.C' external function call API }
 \description{
-  \code{exageostat_egenz_glR} demonstrates the R / C language interface
+  \code{simulate_obs_exact} demonstrates the R / C language interface
 }
 \usage{
-exageostat_egenzR(n,
+simulate_data_exact(n,
 		ncores,
 		gpus,
 		ts,
@@ -45,7 +45,7 @@ exageostat_egenzR(n,
 # inline call at R command line or in another R function:
 # Provides function arguments for and calls the R gen_z_exact_given_locs() function.
 #
-#exageostat_egenz_glR(n,
+#simulate_obs_exact(n,
 #               ncores,
 #               gpus,
 #               ts,

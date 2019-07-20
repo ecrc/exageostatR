@@ -1,11 +1,11 @@
-\name{exageostat_egenzR}
-\alias{exageostat_egenzR}
+\name{simulate_data_exact}
+\alias{simulate_data_exact}
 \title{ Sets up the call to the gen_z_exact() C language function accessed via the  R '.C' external function call API }
 \description{
-  \code{exageostat_egenzR} demonstrates the R / C language interface
+  \code{simulate_data_exact} demonstrates the R / C language interface
 }
 \usage{
-exageostat_egenzR(n,
+simulate_data_exact(n,
 		ncores,
 		gpus,
 		ts,
@@ -43,7 +43,7 @@ exageostat_egenzR(n,
 # inline call at R command line or in another R function:
 # Provides function arguments for and calls the R exageostat__gen_zR() function.
 #
-#exageostat_egenzR(n,
+#simulate_data_exact(n,
 #               ncores,
 #               gpus,
 #               ts,
