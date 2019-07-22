@@ -1,7 +1,7 @@
-ExaGeoStat-R
+ExaGeoStatR
 ============
 
-`ExaGeoStat-R` is an R-Wrapper for [ExaGeoStat framework]((https://github.com/ecrc/exageostat)), a parallel high performance unified framework for geostatistics on manycore systems.
+`ExaGeoStatR` is an R-Wrapper for [ExaGeoStat framework]((https://github.com/ecrc/exageostat)), a parallel high performance unified framework for geostatistics on manycore systems.
 
 Getting Started
 ===============
@@ -16,10 +16,9 @@ Getting Started
 5. [Chameleon](https://project.inria.fr/chameleon/).
 6. [Hicma](https://github.com/ecrc/hicma/).
 7. [Stars-H](https://github.com/ecrc/stars-h/).
-An easy installation of the above packages is available by using [build-deps.sh](https://github.com/ecrc/exageostatR/blob/master/build_deps.sh)
 
 
-#### Install latest ExaGeoStat-R version hosted on GitHub(parallel installation)
+#### Install latest ExaGeoStatR version hosted on GitHub(parallel installation)
 ```r
 install.packages("devtools")
 library("devtools")
@@ -29,7 +28,7 @@ install_git(url="https://github.com/ecrc/exageostatR-dev")
 ```
 
 
-#### Install latest ExaGeoStat-R version hosted on GitHub (sequential installation)
+#### Install latest ExaGeoStatR version hosted on GitHub (sequential installation)
 ```r
 install.packages("devtools")
 library("devtools")
@@ -40,17 +39,34 @@ install_git(url="https://github.com/ecrc/exageostatR-dev")
 ```
 
 
-#### Get the latest ExaGeoStat-R release  hosted on GitHub
-
-1. Download exageostat_1.0.0.tar.gz from release
-2. Use R to install exageostat_1.0.0.tar.gz
+#### Install latest ExaGeoStatR version hosted on GitHub with GPU support
 ```r
-install.packages(repos=NULL, "exageostat_1.0.0.tar.gz")
-library(exageostat)
+install.packages("devtools")
+library("devtools")
+Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
+Sys.setenv(MKLROOT="/opt/intel/mkl")
+install_git(url="https://github.com/ecrc/exageostatR-dev", configure.args=C('--enable-cuda'))
 ```
 
+#### Install latest ExaGeoStatR version hosted on GitHub with MPI support
+```r
+install.packages("devtools")
+library("devtools")
+Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
+Sys.setenv(MKLROOT="/opt/intel/mkl")
+install_git(url="https://github.com/ecrc/exageostatR-dev", configure.args=C('--enable-mpi'))
+```
 
-Features of ExaGeoStat-R
+[comment]: <> (#### Get the latest ExaGeoStatR release  hosted on GitHub)
+[comment]: <> (1. Download exageostat_1.0.0.tar.gz from release)
+[comment]: <> (2. Use R to install exageostat_1.0.0.tar.gz)
+[comment]: <> (```r)
+[comment]: <> (install.packages(repos=NULL, "exageostat_1.0.0.tar.gz"))
+[comment]: <> (library(exageostat))
+[comment]: <> (```)
+
+
+Features of ExaGeoStatR
 ========================
 Operations:
 
@@ -68,7 +84,7 @@ R Examples
 ================
 1. Test Generating Z vector using random (x, y) locations with exact MLE computation.
 ```r
-library("exageostat")                                          #Load ExaGeoStat-R lib.
+library("exageostatr")                                        #Load ExaGeoStatR lib.
 seed          = 0                                             #Initial seed to generate XY locs.
 sigma_sq      = 1                                             #Initial variance.
 beta          = 0.1                                           #Initial smoothness.
@@ -89,7 +105,7 @@ exageostat_finalize()
 
 2. Test Generating Z vector using random (x, y) locations with TLR MLE computation.
 ```r
-library("exageostat")                                           #Load ExaGeoStat-R lib.
+library("exageostatr")                                          #Load ExaGeoStatR lib.
 seed            = 0                                             #Initial seed to generate XY locs.
 sigma_sq        = 1                                             #Initial variance.
 beta            = 0.03                                          #Initial smoothness.
@@ -102,9 +118,9 @@ tlr_maxrank     = 450                                           #Max Rank
 #Initiate exageostat instance
 exageostat_init(hardware = list (ncores=2, ngpus=0, ts=320, lts=600,  pgrid=1, qgrid=1))#Initiate exageostat instance
 #Generate Z observation vector
-data         = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vecto
+data         	= simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vector
 #Estimate MLE parameters (TLR approximation)
-result       = tlr_mle(data, tlr_acc, tlr_maxrank,  dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 20))
+result       	= tlr_mle(data, tlr_acc, tlr_maxrank,  dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 20))
 #print(result)
 #Finalize exageostat instance
 exageostat_finalize()
@@ -112,7 +128,7 @@ exageostat_finalize()
 
 3. Test Generating Z vector using random (x, y) locations with DST MLE computation.
 ```r
-library("exageostat")                                           #Load ExaGeoStat-R lib.
+library("exageostatr")                                          #Load ExaGeoStatR lib.
 seed            = 0                                             #Initial seed to generate XY locs.
 sigma_sq        = 1                                             #Initial variance.
 beta            = 0.03                                          #Initial smoothness.
@@ -123,16 +139,16 @@ dst_thick       = 3                                             #Number of used 
 #Initiate exageostat instance
 exageostat_init(hardware = list (ncores=4, ngpus=0, ts=320, lts=0,  pgrid=1, qgrid=1))
 #Generate Z observation vector
-data      = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vecto
+data      	= simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vecto
 #Estimate MLE parameters (DST approximation)
-result       = dst_mle(data, dst_thick, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 20))
+result       	= dst_mle(data, dst_thick, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 20))
 #print(result)
 #Finalize exageostat instance
 exageostat_finalize()
 ```
 4. Test Generating Z vector using given (x, y) locations with exact MLE computation.
 ```r
-library("exageostat")                                                   #Load ExaGeoStat-R lib.
+library("exageostatr")                                                  #Load ExaGeoStatR lib.
 sigma_sq        = 1                                                     #Initial variance.
 beta            = 0.1                                                   #Initial smoothness.
 nu              = 0.5                                                   #Initial range.
@@ -143,9 +159,9 @@ y               = rnorm(n = 1600, mean = 80.45, sd = 100.19)    #y measurements 
 #Initiate exageostat instance
 exageostat_init(hardware = list (ncores=2, ngpus=0, ts=320, lts=0,  pgrid=1, qgrid=1))#Initiate exageostat instance
 #Generate Z observation vector based on given locations
-data          = simulate_obs_exact( x, y, sigma_sq, beta, nu, dmetric)
+data            = simulate_obs_exact( x, y, sigma_sq, beta, nu, dmetric)
 #Estimate MLE parameters (Exact)
-result        = exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 20))
+result          = exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 20))
 #print(result)
 #Finalize exageostat instance
 exageostat_finalize()

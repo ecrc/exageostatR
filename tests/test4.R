@@ -14,7 +14,7 @@
  #
  # @author Sameh Abdulah
  # @date 2019-01-17
-library("exageostat")                                                   #Load ExaGeoStat-R lib.
+library("exageostatr")                                                   #Load ExaGeoStat-R lib.
 sigma_sq        = 1                                                     #Initial variance.
 beta            = 0.1                                                   #Initial smoothness.
 nu 	        = 0.5                                                   #Initial range.

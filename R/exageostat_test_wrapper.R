@@ -17,7 +17,7 @@
 Test1 <- function()
   # Test Generating Z vector using random (x, y) locations with exact MLE computation.
 {
-  library("exageostat")                                           #Load ExaGeoStat-R lib.
+  library("exageostatr")                                           #Load ExaGeoStat-R lib.
   seed            = 0                                             #Initial seed to generate XY locs.
   sigma_sq        = 1                                             #Initial variance.
   beta            = 0.1                                           #Initial smoothness.
@@ -54,7 +54,7 @@ Test1 <- function()
 Test2 <- function()
   # Test Generating Z vector using random (x, y) locations with TLR MLE computation.
 {
-  library("exageostat")                                           #Load ExaGeoStat-R lib.
+  library("exageostatr")                                           #Load ExaGeoStat-R lib.
   seed            = 0                                             #Initial seed to generate XY locs.
   sigma_sq        = 1                                             #Initial variance.
   beta            = 0.03                                          #Initial smoothness.
@@ -97,7 +97,7 @@ Test2 <- function()
 Test3 <- function()
   # Test Generating Z vector using random (x, y) locations with DST MLE computation.
 {
-  library("exageostat")                                           #Load ExaGeoStat-R lib.
+  library("exageostatr")                                           #Load ExaGeoStat-R lib.
   seed            = 0                                             #Initial seed to generate XY locs.
   sigma_sq        = 1                                             #Initial variance.
   beta            = 0.03                                          #Initial smoothness.
@@ -136,7 +136,7 @@ Test3 <- function()
 Test4 <- function()
   # Test Generating Z vector using given (x, y) locations with exact MLE computation.
 {
-  library("exageostat")                                                   #Load ExaGeoStat-R lib.
+  library("exageostatr")                                                   #Load ExaGeoStat-R lib.
   sigma_sq        = 1                                                     #Initial variance.
   beta            = 0.1                                                   #Initial smoothness.
   nu              = 0.5                                                   #Initial range.
