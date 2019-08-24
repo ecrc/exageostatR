@@ -24,7 +24,7 @@ install.packages("devtools")
 library("devtools")
 Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 Sys.setenv(MKLROOT="/opt/intel/mkl")
-install_git(url="https://github.com/ecrc/exageostatR-dev")
+install_git(url="https://github.com/ecrc/exageostatR")
 ```
 
 
@@ -35,7 +35,7 @@ library("devtools")
 Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 Sys.setenv(MKLROOT="/opt/intel/mkl")
 Sys.setenv(MAKE="make -j 1")
-install_git(url="https://github.com/ecrc/exageostatR-dev")
+install_git(url="https://github.com/ecrc/exageostatR")
 ```
 
 
@@ -45,7 +45,7 @@ install.packages("devtools")
 library("devtools")
 Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 Sys.setenv(MKLROOT="/opt/intel/mkl")
-install_git(url="https://github.com/ecrc/exageostatR-dev", configure.args=C('--enable-cuda'))
+install_git(url="https://github.com/ecrc/exageostatR", configure.args=C('--enable-cuda'))
 ```
 
 #### Install latest ExaGeoStatR version hosted on GitHub with MPI support
@@ -54,7 +54,7 @@ install.packages("devtools")
 library("devtools")
 Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 Sys.setenv(MKLROOT="/opt/intel/mkl")
-install_git(url="https://github.com/ecrc/exageostatR-dev", configure.args=C('--enable-mpi'))
+install_git(url="https://github.com/ecrc/exageostatR", configure.args=C('--enable-mpi'))
 ```
 
 [comment]: <> (#### Get the latest ExaGeoStatR release  hosted on GitHub)
