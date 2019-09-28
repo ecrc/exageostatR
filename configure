@@ -5,8 +5,15 @@
 #
 #
 
+#Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:${R_HOME}/exageostat/lib/pkgconfig
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_LIBS_USER/exageostat/lib/pkgconfig
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_LIBS/exageostat/lib/pkgconfig
+
+
 #Get the number of CPUs
 cpucores=`getconf _NPROCESSORS_ONLN`
+#cpucores=1
 
 #VARIABLES
 MAKE=${MAKE:-make -j $(cpucores) -l $((cpucores + 1))}
@@ -121,7 +128,7 @@ esac
 
 
 # check submodules just in case
-git submodule update --init --recursive 2>&1 >/dev/null || true
+#git submodule update --init --recursive 2>&1 >/dev/null || true
 
 ##### check and build dependencies
 # prepare environment
@@ -141,25 +148,50 @@ else
 fi
 
 #set pkgconfig path including possible installation dir
+
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SETUP_DIR/lib/pkgconfig
 
 # openblas
 if [ "true" == "$USE_OPENBLAS" ]
 then
-    if pkg-config --exists openblas
-    then
-        _LOCATION=`pkg-config --variable=libdir openblas`
-        echo "OpenBLAS FOUND in [$_LOCATION]"
-    else
+     _OPENBLAS='false'
+     if pkg-config --exists openblas
+     then
+         #check for lapacke.h
+         _LOCATION=`pkg-config --variable=includedir openblas`
+         if stat "${_LOCATION}/lapacke.h" >/dev/null 2>&1
+         then
+             _LOCATION=`pkg-config --variable=libdir openblas`
+             echo "OpenBLAS FOUND in [$_LOCATION]"
+             _OPENBLAS='true'
+         fi
+     fi
+     if [ "false" == "${_OPENBLAS}" ]
+     then 
         if [ "$BUILD_DEPENDENCIES" == "true" ]
         then
             echo "Building OpenBLAS..."
             cd $TMPDIR
-            wget https://github.com/xianyi/OpenBLAS/archive/v0.3.3.tar.gz -O - | tar -zx
-            cd OpenBLAS-0.3.3
-            $MAKE -j  >/dev/null|| $MAKE || { echo 'OpenBLAS installation failed' ; exit 1; }
+            wget https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz -O - | tar -zx
+            cd OpenBLAS-0.3.7
+            $MAKE -j PREFIX=$PREFIX >/dev/null|| $MAKE PREFIX=$PREFIX || { echo 'OpenBLAS installation failed' ; exit 1; }
 	    $MAKE install PREFIX=$PREFIX
-            export CPATH=$CPATH:$PREFIX/include
+            export CPATH=$PREFIX/include:$CPATH
+	    export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+    	    OPENBLAS_CFLAGS=`pkg-config --variable=includedir openblas`
+	    OPENBLAS_LIBS=`pkg-config --variable=libdir openblas`
+            PKG_CPPFLAGS=`pkg-config --variable=includedir openblas`
+            PKG_LIBS=-l$PREFIX/lib/libopenblas.so
+	    echo "========================="
+	    echo $PKG_LIBS
+            echo "+++++++++++++++++++++++++="
+	    #DEFINE_BLAS_LIBS_CMAKE="-DBLAS_DIR='${PREFIX}'  -DCBLAS_DIR='${PREFIX}' -DLAPACK_DIR='${PREFIX}' -DLAPACKE_DIR='${PREFIX}' -DTMG='${PREFIX}'"
+	    #export OPENBLAS_CFLAGS=-I$PREFIX/include
+	    #export OPENBLAS_LIBS=-L$PREFIX/lib
+            #export BLAS_OPENBLAS_CFLAGS=-I{$PREFIX/include
+	    export BLAS_OPENBLAS_LIBS=-l$PREFIX/lib/libopenblas.so
+	    #cp $PREFIX/lib/libopenblas.so $BASEDIR/src
+            #export BLAS_LIBS=-L{$PREFIX}/lib
         else
             echo "####################"
             echo "OpenBLAS NOT FOUND"
@@ -196,6 +228,27 @@ else
     fi
 fi
 
+echo "==========================================="
+#EXAGEOSTAT_CONFIG=`Rscript -e '.libPaths()' | awk '{printf "%s/exageostat/lib/pkgconfig:",substr($2,2,length($2)-2)}'`
+echo ${R_HOME}
+echo "==========================================="
+echo $R_LIBS_USER
+echo "==========================================="
+echo $R_LIBS
+echo "==========================================="
+#Rscript -e '.libPaths()'
+echo $PKG_LIBS
+echo "==========================================="
+echo $PKG_CXXFLAGS
+echo "==========================================="
+echo $PKG_CONFIG_PATH
+echo "==========================================="
+echo $PKG_CPPFLAGS
+echo "==========================================="
+
+nm $PREFIX/lib/libopenblas.so | grep "LAPACKE_slarfb_work"
+
+echo "==========================================="
 # nlopt
 if pkg-config --exists --atleast-version=2.4 nlopt
 then
@@ -259,9 +312,9 @@ else
         wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz -O - | tar -zx
         cd starpu-1.2.5
         if [ "$CUDAVALUE" == "ON" ]; then
-            ./configure --enable-cuda --disable-opencl --prefix=$PREFIX
+            ./configure --enable-cuda --disable-opencl --prefix=$PREFIX  --enable-blas-lib=none
         else
-            ./configure --disable-cuda --disable-opencl --prefix=$PREFIX
+            ./configure --disable-cuda --disable-opencl --prefix=$PREFIX --enable-blas-lib=none
         fi
         $MAKE || $MAKE VERBOSE=1 || { echo 'STARPU installation failed' ; exit 1; }
         $MAKE install
@@ -274,6 +327,7 @@ else
         err=1
     fi
 fi
+
 
 cd $BASEDIR
 set -x
@@ -314,7 +368,7 @@ else
         cd $BASEDIR/src/stars-h
         mkdir -p build && cd build
         rm -rf ./CMake*
-        cmake -DCMAKE_C_FLAGS=-fPIC -DOPENMP=OFF -DSTARPU=OFF -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
+        cmake -DCMAKE_C_FLAGS=-fPIC -DOPENMP=OFF -DSTARPU=OFF  -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
         $MAKE || $MAKE VERBOSE=1 || { echo 'STARS-H installation failed' ; exit 1; }
         $MAKE install
     else
@@ -359,6 +413,10 @@ fi
 cd $BASEDIR/
 rm -rf ./CMakeFiles ./CMakeCache.txt
 cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast" -DBUILD_SHARED_LIBS=ON -DEXAGEOSTAT_EXAMPLES=OFF "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" -DEXAGEOSTAT_USE_MPI=$MPIVALUE -DEXAGEOSTAT_USE_HICMA=ON ./src
+echo "======================================"
+echo "$(ls $PREFIX/lib)"
+echo "======================================"
+
 cat > src/Makefile << EOF
 .PHONY: all clean
 all:
