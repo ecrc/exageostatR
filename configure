@@ -314,7 +314,7 @@ else
         cd $BASEDIR/src/stars-h
         mkdir -p build && cd build
         rm -rf ./CMake*
-        cmake -DCMAKE_C_FLAGS=-fPIC -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
+        cmake -DCMAKE_C_FLAGS=-fPIC -DOPENMP=OFF -DSTARPU=OFF -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
         $MAKE || $MAKE VERBOSE=1 || { echo 'STARS-H installation failed' ; exit 1; }
         $MAKE install
     else
