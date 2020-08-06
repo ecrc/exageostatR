@@ -1,4 +1,5 @@
-useDynLib(exageostat)
+useDynLib(exageostat, .registration = TRUE)
+importFrom("stats", "rnorm")
 export(Test1)
 export(Test2)
 export(Test3)
