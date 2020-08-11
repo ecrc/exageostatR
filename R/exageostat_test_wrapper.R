@@ -197,7 +197,7 @@ Test4 <- function()
 #' @param sigma_sq A number - variance parameter
 #' @param beta A number - smoothness parameter)
 #' @param nu A number  - range parameter
-#' @param dmetric  A string -  distance metric - "dm" or "gcd"
+#' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
 #' @param n  A number -  data size
 #' @param seed  A number -  seed of random generation
 #' @return a list of of three vectors (x, y, z)
@@ -207,12 +207,20 @@ simulate_data_exact <-
   function(sigma_sq,
            beta,
            nu,
-           dmetric = 0,
+           dmetric = c("euclidean", "great_circle"),
            n,
            seed = 0)
   {
+    if(length(dmetric) > 1) 
+	    dmetric = dmetric[1]
+    if(tolower(dmetric) == "euclidean")
+	    dmetric = 0
+    else if(tolower(dmetric) == "great_circle")
+	    dmetric = 1
+    else
+	    stop("Invalid input for dmetric")
     globalveclen = 3 * n
-    globalvec  = vector (mode = "double", length = globalveclen)
+    # globalvec  = vector (mode = "double", length = globalveclen)
     globalvec2 = .C(
       "gen_z_exact",
       as.double(sigma_sq),
@@ -247,13 +255,22 @@ simulate_data_exact <-
 #' @param sigma_sq A number - variance parameter
 #' @param beta A number - smoothness parameter)
 #' @param nu A number  - range parameter
-#' @param dmetric  A string -  distance metric - "dm" or "gcd"
+#' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
 #' @return a list of of three vectors (x, y, z)
 #' @examples
 #' data = simulate_obs_exact(x, y, sigma_sq, beta, nu, dmetric)
 simulate_obs_exact <-
-  function(x, y, sigma_sq, beta, nu, dmetric = 0)
+  function(x, y, sigma_sq, beta, nu, 
+           dmetric = c("euclidean", "great_circle"))
   {
+    if(length(dmetric) > 1) 
+	    dmetric = dmetric[1]
+    if(tolower(dmetric) == "euclidean")
+	    dmetric = 0
+    else if(tolower(dmetric) == "great_circle")
+	    dmetric = 1
+    else
+	    stop("Invalid input for dmetric")
     n = length(x)
     globalveclen = 3 * n
     globalvec  = vector (mode = "double", length = globalveclen)
@@ -290,12 +307,12 @@ simulate_obs_exact <-
 
 #' Maximum Likelihood Evaluation  using exact method
 #' @param data A list of x vector (x-dim), y vector (y-dim), and z observation vector
-#' @param dmetric  A string -  distance metric - "dm" or "gcd"
+#' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
 #' @param optimization  A list of opt lb values (clb), opt ub values (cub), tol, max_iters
 #' @return vector of three values (theta1, theta2, theta3)
 exact_mle <-
   function(data = list (x, y, z),
-           dmetric = 0,
+           dmetric = c("euclidean", "great_circle"),
            optimization = list(
              clb = c(0.001, 0.001, 0.001),
              cub = c(5, 5, 5),
@@ -303,6 +320,14 @@ exact_mle <-
              max_iters = 100
            ))
   {
+    if(length(dmetric) > 1) 
+	    dmetric = dmetric[1]
+    if(tolower(dmetric) == "euclidean")
+	    dmetric = 0
+    else if(tolower(dmetric) == "great_circle")
+	    dmetric = 1
+    else
+	    stop("Invalid input for dmetric")
     n = length(data$x)
     theta_out2 = .C(
       "mle_exact",
@@ -346,14 +371,14 @@ exact_mle <-
 #' @param data A list of x vector (x-dim), y vector (y-dim), and z observation vector
 #' @param tlr_acc  A number - TLR accuracy level
 #' @param tlr_maxrank  A string -  TLR max rank
-#' @param dmetric  A string -  distance metric - "dm" or "gcd"
+#' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
 #' @param optimization  A list of opt lb values (clb), opt ub values (cub), tol, max_iters
 #' @return vector of three values (theta1, theta2, theta3)
 tlr_mle <-
   function(data = list (x, y, z),
            tlr_acc = 9,
            tlr_maxrank = 400,
-           dmetric = 0,
+           dmetric = c("euclidean", "great_circle"),
            optimization = list(
              clb = c(0.001, 0.001, 0.001),
              cub = c(5, 5, 5),
@@ -361,6 +386,14 @@ tlr_mle <-
              max_iters = 100
            ))
   {
+    if(length(dmetric) > 1) 
+	    dmetric = dmetric[1]
+    if(tolower(dmetric) == "euclidean")
+	    dmetric = 0
+    else if(tolower(dmetric) == "great_circle")
+	    dmetric = 1
+    else
+	    stop("Invalid input for dmetric")
     n = length(data$x)
     theta_out2 = .C(
       "mle_tlr",
@@ -404,13 +437,13 @@ tlr_mle <-
 #' Maximum Likelihood Evaluation (MLE) using Diagonal Super-tile (DST) method
 #' @param data A list of x vector (x-dim), y vector (y-dim), and z observation vector
 #' @param dst_thick  A number - Diagonal Super-Tile (DST) diagonal thick
-#' @param dmetric  A string -  distance metric - "dm" or "gcd"
+#' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
 #' @param optimization  A list of opt lb (clb), opt ub (cub), tol, max_iters
 #' @return vector of three values (theta1, theta2, theta3)
 dst_mle <-
   function(data = list (x, y, z),
            dst_thick,
-           dmetric = 0,
+           dmetric = c("euclidean", "great_circle"),
            optimization = list(
              clb = c(0.001, 0.001, 0.001),
              cub = c(5, 5, 5),
@@ -418,6 +451,14 @@ dst_mle <-
              max_iters = 100
            ))
   {
+    if(length(dmetric) > 1) 
+	    dmetric = dmetric[1]
+    if(tolower(dmetric) == "euclidean")
+	    dmetric = 0
+    else if(tolower(dmetric) == "great_circle")
+	    dmetric = 1
+    else
+	    stop("Invalid input for dmetric")
     n = length(data$x)
     theta_out2 = .C(
       "mle_dst",
@@ -473,14 +514,6 @@ exageostat_init <-
     qgrid = 1
   ))
 {
-
-    ncores = 1
-    ngpus = 0
-    dts = 360
-    lts = 600
-    pgrid = 1
-    qgrid = 1
-
     ncores <<- hardware$ncores
     ngpus <<- hardware$ngpus
     dts <<- hardware$ts
@@ -508,3 +541,31 @@ exageostat_finalize <- function()
   print("back from exageostat_finalize C function call. Hit key....")
 }
 
+check_lb_ub <- function(lb, ub)
+{
+	if(!all(lb <= ub))
+		stop("Lower bounds should be no bigger than the upper bounds")
+}
+
+check_positive <- function(...)
+{
+	args <- list(...)
+	argc <- length(args)
+	for(i in 1 : argc)
+		if(!all(args[[i]] > 0))
+			return i
+	return 0
+}
+
+check_same_length <- function(...)
+{
+	args <- list(...)
+	argc <- length(args)
+	if(argc == 0)
+		return TRUE
+	len <- length(args[[1]])
+	for(i in 1 : argc)
+		if(length(args[[i]]) != len)
+			return FALSE
+	return TRUE
+}
