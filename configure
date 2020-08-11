@@ -432,7 +432,7 @@ else
     if [ "$BUILD_DEPENDENCIES" == "true" ]
     then
         echo "Building CHAMELEON..."
-	cp -r $BASEDIR/src/h $TMPDIR
+	cp -r $BASEDIR/src/hicma $TMPDIR/h
         cd $TMPDIR/h/chameleon
         mkdir -p build && cd build
         rm -rf ./CMake*
