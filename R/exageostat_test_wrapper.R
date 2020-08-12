@@ -15,184 +15,6 @@
 # @author Sameh Abdulah
 # @date 2019-09-25
 
-#' Test Generating Z vector using random (x, y) locations with exact MLE computation.
-#' @examples
-#' Test1()
-
-
-  utils::globalVariables(c("ncores"))
-  utils::globalVariables(c("ngpus"))
-  utils::globalVariables(c("dts"))
-  utils::globalVariables(c("lts"))
-  utils::globalVariables(c("pgrid"))
-  utils::globalVariables(c("qgrid"))
-  utils::globalVariables(c("x"))
-  utils::globalVariables(c("y"))
-  utils::globalVariables(c("z"))
-
-
-
-Test1 <- function()
-{
-  library("exageostatr")                                          #Load ExaGeoStat-R lib.
-  #Sys.setenv(STARPU_HOME = "~/trash") 
-  Sys.setenv(STARPU_HOME = tempdir())
-  seed            = 0                                             #Initial seed to generate XY locs.
-  sigma_sq        = 1                                             #Initial variance.
-  beta            = 0.1                                           #Initial smoothness.
-  nu              = 0.5                                           #Initial range.
-  dmetric         = 0                                             #0 --> Euclidean distance, 1--> great circle distance.
-  n               = 144                                           #n*n locations grid.
-  #theta_out[1:3]                  = -1.99
-  exageostat_init(hardware = list (
-    ncores = 2,
-    ngpus  = 0,
-    ts     = 32,
-    pgrid  = 1,
-    qgrid  = 1
-  ))#Initiate exageostat instance
-  #Generate Z observation vector
-  data      = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vector
-  #Estimate MLE parameters (Exact)
-  result          = exact_mle(data,
-                            dmetric,
-                            optimization = list(
-                              clb = c(0.001, 0.001, 0.001),
-                              cub = c(5, 5, 5),
-                              tol = 1e-4,
-                              max_iters = 1
-                            ))
-  
-  #print(result)
-  #Finalize exageostat instance
-  exageostat_finalize()
-  browser()
-}
-
-#' Test Generating Z vector using random (x, y) locations with TLR MLE computation.
-#' @examples
-#' Test2()
-Test2 <- function()
-{
-  library("exageostatr")                                          #Load ExaGeoStat-R lib.
-  seed            = 0                                             #Initial seed to generate XY locs.
-  sigma_sq        = 1                                             #Initial variance.
-  beta            = 0.03                                          #Initial smoothness.
-  nu              = 0.5                                           #Initial range.
-  dmetric         = 0                                             #0 --> Euclidean distance, 1--> great circle distance.
-  n               = 900                                           #n*n locations grid.
-  tlr_acc         = 7                                             #Approximation accuracy 10^-(acc)
-  tlr_maxrank     = 150                                           #Max Rank
-  
-  #Initiate exageostat instance
-  exageostat_init(hardware = list (
-    ncores = 2,
-    ngpus  = 0,
-    ts     = 320,
-    lts    = 600,
-    pgrid  = 1,
-    qgrid  = 1
-  ))#Initiate exageostat instance
-  #Generate Z observation vector
-  data      = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vecto
-  #Estimate MLE parameters (TLR approximation)
-  result       = tlr_mle(
-    data,
-    tlr_acc,
-    tlr_maxrank,
-    dmetric,
-    optimization = list(
-      clb = c(0.001, 0.001, 0.001),
-      cub = c(5, 5, 5),
-      tol = 1e-4,
-      max_iters = 4
-    )
-  )
-  #print(result)
-  #Finalize exageostat instance
-  exageostat_finalize()
-  browser()
-}
-
-#' Test Generating Z vector using random (x, y) locations with DST MLE computation.
-#' @examples
-#' Test3()
-Test3 <- function()
-{
-  library("exageostatr")                                          #Load ExaGeoStat-R lib.
-  seed            = 0                                             #Initial seed to generate XY locs.
-  sigma_sq        = 1                                             #Initial variance.
-  beta            = 0.03                                          #Initial smoothness.
-  nu              = 0.5                                           #Initial range.
-  dmetric         = 0                                             #0 --> Euclidean distance, 1--> great circle distance.
-  n               = 900                                           #n*n locations grid.
-  dst_thick       = 3                                             #Number of used Diagonal Super Tile (DST).
-  #Initiate exageostat instance
-  exageostat_init(hardware = list (
-    ncores = 4,
-    ngpus  = 0,
-    ts     = 320,
-    lts    = 0,
-    pgrid  = 1,
-    qgrid  = 1
-  ))
-  #Generate Z observation vector
-  data      = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vecto
-  #Estimate MLE parameters (DST approximation)
-  result       = dst_mle(data,
-                         dst_thick,
-                         dmetric,
-                         optimization = list(
-                           clb = c(0.001, 0.001, 0.001),
-                           cub = c(5, 5, 5),
-                           tol = 1e-4,
-                           max_iters = 4
-                         ))
-  #print(result)
-  #Finalize exageostat instance
-  exageostat_finalize()
-  browser()
-}
-
-#' Test Generating Z vector using given (x, y) locations with exact MLE computation.
-#' @examples
-#' Test4()
-Test4 <- function()
-{
-  library("exageostatr")                                          #Load ExaGeoStat-R lib.
-  sigma_sq        = 1                                             #Initial variance.
-  beta            = 0.1                                           #Initial smoothness.
-  nu              = 0.5                                           #Initial range.
-  dmetric         = 0                                             #0 --> Euclidean distance, 1--> great circle distance.
-  n               = 1600                                          #n*n locations grid.
-  x               = rnorm(n = 1600, mean = 39.74, sd = 25.09)     #x measurements of n locations.
-  y               = rnorm(n = 1600, mean = 80.45, sd = 100.19)    #y measurements of n locations.
-  #Initiate exageostat instance
-  exageostat_init(hardware = list (
-    ncores = 2,
-    ngpus  = 0,
-    ts     = 320,
-    lts    = 0,
-    pgrid  = 1,
-    qgrid  = 1
-  ))#Initiate exageostat instance
-  #Generate Z observation vector based on given locations
-  data          = simulate_obs_exact(x, y, sigma_sq, beta, nu, dmetric)
-  #Estimate MLE parameters (Exact)
-  result        = exact_mle(data,
-                            dmetric,
-                            optimization = list(
-                              clb = c(0.001, 0.001, 0.001),
-                              cub = c(5, 5, 5),
-                              tol = 1e-4,
-                              max_iters = 4
-                            ))
-  #print(result)
-  #Finalize exageostat instance
-  exageostat_finalize()
-  browser()
-}
-
 #' Simulate Geospatial data (x, y, z)
 #' @param sigma_sq A number - variance parameter
 #' @param beta A number - smoothness parameter)
@@ -202,7 +24,16 @@ Test4 <- function()
 #' @param seed  A number -  seed of random generation
 #' @return a list of of three vectors (x, y, z)
 #' @examples
-#' data = simulate_data_exact( sigma_sq, beta, nu, dmetric, seed)
+#' seed = 0  ##Initial seed to generate XY locs.
+#' sigma_sq = 1 ##Initial variance.
+#' beta = 0.1 ##Initial smoothness.
+#' nu = 0.5 ##Initial range.
+#' dmetric = 0 ##0 --> Euclidean distance, 1--> great circle distance.
+#' n = 1600 ## The number of locations (n must be a square number, n=m^2).
+#' exageostat_init(hardware = list (ncores = 2, ngpus = 0, ts = 320, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
+#' data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ##Generate Z observation vector
+#' data
+#' exageostat_finalize() ##Finalize exageostat instance
 simulate_data_exact <-
   function(sigma_sq,
            beta,
@@ -250,7 +81,17 @@ simulate_data_exact <-
 #' @param dmetric  A string -  distance metric - "dm" or "gcd"
 #' @return a list of of three vectors (x, y, z)
 #' @examples
-#' data = simulate_obs_exact(x, y, sigma_sq, beta, nu, dmetric)
+#' sigma_sq = 1 ##Initial variance.
+#' beta = 0.1 ##Initial smoothness.
+#' nu = 0.5 ##Initial range.
+#' dmetric = 0 ##0 --> Euclidean distance, 1--> great circle distance.
+#' n = 1600 ## The number of locations (n must be a square number, n=m^2)
+#' x = rnorm(n, 0, 1)     #x measurements of n locations.
+#' y = rnorm(n, 0, 1)    #y measurements of n locations.
+#' exageostat_init(hardware = list (ncores = 2, ngpus = 0, ts = 320, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
+#' data = simulate_obs_exact(x, y, sigma_sq, beta, nu, dmetric) ##Generate Z observation vector based on given locations
+#' data
+#' exageostat_finalize() ##Finalize exageostat instance
 simulate_obs_exact <-
   function(x, y, sigma_sq, beta, nu, dmetric = 0)
   {
@@ -293,6 +134,20 @@ simulate_obs_exact <-
 #' @param dmetric  A string -  distance metric - "dm" or "gcd"
 #' @param optimization  A list of opt lb values (clb), opt ub values (cub), tol, max_iters
 #' @return vector of three values (theta1, theta2, theta3)
+#' @examples
+#' seed = 0  ##Initial seed to generate XY locs.
+#' sigma_sq = 1 ##Initial variance.
+#' beta = 0.1 ##Initial smoothness.
+#' nu = 0.5 ##Initial range.
+#' dmetric = 0 ##0 --> Euclidean distance, 1--> great circle distance.
+#' n = 144 ## The number of locations (n must be a square number, n=m^2).
+#' theta_out[1:3] = -1.99 ## Initial outputs
+#' exageostat_init(hardware = list (ncores = 2, ngpus = 0, ts = 32, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
+#' data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ##Generate Z observation vector
+#' ##Estimate MLE parameters (Exact)
+#' result = exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-4, max_iters = 1))
+#' print(result)
+#' exageostat_finalize() ##Finalize exageostat instance
 exact_mle <-
   function(data = list (x, y, z),
            dmetric = 0,
@@ -349,6 +204,21 @@ exact_mle <-
 #' @param dmetric  A string -  distance metric - "dm" or "gcd"
 #' @param optimization  A list of opt lb values (clb), opt ub values (cub), tol, max_iters
 #' @return vector of three values (theta1, theta2, theta3)
+#' @examples
+#' seed = 0  ##Initial seed to generate XY locs.
+#' sigma_sq = 1 ##Initial variance.
+#' beta = 0.03 ##Initial smoothness.
+#' nu = 0.5 ##Initial range.
+#' dmetric = 0 ##0 --> Euclidean distance, 1--> great circle distance.
+#' n = 900 ## The number of locations (n must be a square number, n=m^2).
+#' tlr_acc = 7 ##Approximation accuracy 10^-(acc)
+#' tlr_maxrank = 150 ##Max Rank
+#' exageostat_init(hardware = list (ncores = 2, ngpus = 0, ts = 320, lts = 600, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
+#' data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ##Generate Z observation vector
+#' ##Estimate MLE parameters (TLR approximation)
+#' result = tlr_mle(data, tlr_acc, tlr_maxrank, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-4, max_iters = 4))
+#' print(result)
+#' exageostat_finalize() ##Finalize exageostat instance
 tlr_mle <-
   function(data = list (x, y, z),
            tlr_acc = 9,
@@ -407,6 +277,20 @@ tlr_mle <-
 #' @param dmetric  A string -  distance metric - "dm" or "gcd"
 #' @param optimization  A list of opt lb (clb), opt ub (cub), tol, max_iters
 #' @return vector of three values (theta1, theta2, theta3)
+#' @examples
+#' seed = 0  ##Initial seed to generate XY locs.
+#' sigma_sq = 1 ##Initial variance.
+#' beta = 0.03 ##Initial smoothness.
+#' nu = 0.5 ##Initial range.
+#' dmetric = 0 ##0 --> Euclidean distance, 1--> great circle distance.
+#' n = 900 ## The number of locations (n must be a square number, n=m^2).
+#' dst_thick = 3 ##Number of used Diagonal Super Tile (DST).
+#' exageostat_init(hardware = list (ncores = 4, ngpus = 0, ts = 320, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
+#' data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ##Generate Z observation vector
+#' ##Estimate MLE parameters (TLR approximation)
+#' result = dst_mle(data, dst_thick, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-4, max_iters = 4))
+#' print(result)
+#' exageostat_finalize() ##Finalize exageostat instance
 dst_mle <-
   function(data = list (x, y, z),
            dst_thick,
