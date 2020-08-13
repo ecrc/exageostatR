@@ -15,183 +15,17 @@
 # @author Sameh Abdulah
 # @date 2019-09-25
 
-#' Test Generating Z vector using random (x, y) locations with exact MLE computation.
-#' @examples
-#' Test1()
+library(assertthat)
 
-
-  utils::globalVariables(c("ncores"))
-  utils::globalVariables(c("ngpus"))
-  utils::globalVariables(c("dts"))
-  utils::globalVariables(c("lts"))
-  utils::globalVariables(c("pgrid"))
-  utils::globalVariables(c("qgrid"))
-  utils::globalVariables(c("x"))
-  utils::globalVariables(c("y"))
-  utils::globalVariables(c("z"))
-
-
-
-Test1 <- function()
-{
-  library("exageostatr")                                          #Load ExaGeoStat-R lib.
-  #Sys.setenv(STARPU_HOME = "~/trash") 
-  Sys.setenv(STARPU_HOME = tempdir())
-  seed            = 0                                             #Initial seed to generate XY locs.
-  sigma_sq        = 1                                             #Initial variance.
-  beta            = 0.1                                           #Initial smoothness.
-  nu              = 0.5                                           #Initial range.
-  dmetric         = 0                                             #0 --> Euclidean distance, 1--> great circle distance.
-  n               = 144                                           #n*n locations grid.
-  #theta_out[1:3]                  = -1.99
-  exageostat_init(hardware = list (
-    ncores = 2,
-    ngpus  = 0,
-    ts     = 32,
-    pgrid  = 1,
-    qgrid  = 1
-  ))#Initiate exageostat instance
-  #Generate Z observation vector
-  data      = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vector
-  #Estimate MLE parameters (Exact)
-  result          = exact_mle(data,
-                            dmetric,
-                            optimization = list(
-                              clb = c(0.001, 0.001, 0.001),
-                              cub = c(5, 5, 5),
-                              tol = 1e-4,
-                              max_iters = 1
-                            ))
-  
-  #print(result)
-  #Finalize exageostat instance
-  exageostat_finalize()
-  browser()
-}
-
-#' Test Generating Z vector using random (x, y) locations with TLR MLE computation.
-#' @examples
-#' Test2()
-Test2 <- function()
-{
-  library("exageostatr")                                          #Load ExaGeoStat-R lib.
-  seed            = 0                                             #Initial seed to generate XY locs.
-  sigma_sq        = 1                                             #Initial variance.
-  beta            = 0.03                                          #Initial smoothness.
-  nu              = 0.5                                           #Initial range.
-  dmetric         = 0                                             #0 --> Euclidean distance, 1--> great circle distance.
-  n               = 900                                           #n*n locations grid.
-  tlr_acc         = 7                                             #Approximation accuracy 10^-(acc)
-  tlr_maxrank     = 150                                           #Max Rank
-  
-  #Initiate exageostat instance
-  exageostat_init(hardware = list (
-    ncores = 2,
-    ngpus  = 0,
-    ts     = 320,
-    lts    = 600,
-    pgrid  = 1,
-    qgrid  = 1
-  ))#Initiate exageostat instance
-  #Generate Z observation vector
-  data      = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vecto
-  #Estimate MLE parameters (TLR approximation)
-  result       = tlr_mle(
-    data,
-    tlr_acc,
-    tlr_maxrank,
-    dmetric,
-    optimization = list(
-      clb = c(0.001, 0.001, 0.001),
-      cub = c(5, 5, 5),
-      tol = 1e-4,
-      max_iters = 4
-    )
-  )
-  #print(result)
-  #Finalize exageostat instance
-  exageostat_finalize()
-  browser()
-}
-
-#' Test Generating Z vector using random (x, y) locations with DST MLE computation.
-#' @examples
-#' Test3()
-Test3 <- function()
-{
-  library("exageostatr")                                          #Load ExaGeoStat-R lib.
-  seed            = 0                                             #Initial seed to generate XY locs.
-  sigma_sq        = 1                                             #Initial variance.
-  beta            = 0.03                                          #Initial smoothness.
-  nu              = 0.5                                           #Initial range.
-  dmetric         = 0                                             #0 --> Euclidean distance, 1--> great circle distance.
-  n               = 900                                           #n*n locations grid.
-  dst_thick       = 3                                             #Number of used Diagonal Super Tile (DST).
-  #Initiate exageostat instance
-  exageostat_init(hardware = list (
-    ncores = 4,
-    ngpus  = 0,
-    ts     = 320,
-    lts    = 0,
-    pgrid  = 1,
-    qgrid  = 1
-  ))
-  #Generate Z observation vector
-  data      = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) #Generate Z observation vecto
-  #Estimate MLE parameters (DST approximation)
-  result       = dst_mle(data,
-                         dst_thick,
-                         dmetric,
-                         optimization = list(
-                           clb = c(0.001, 0.001, 0.001),
-                           cub = c(5, 5, 5),
-                           tol = 1e-4,
-                           max_iters = 4
-                         ))
-  #print(result)
-  #Finalize exageostat instance
-  exageostat_finalize()
-  browser()
-}
-
-#' Test Generating Z vector using given (x, y) locations with exact MLE computation.
-#' @examples
-#' Test4()
-Test4 <- function()
-{
-  library("exageostatr")                                          #Load ExaGeoStat-R lib.
-  sigma_sq        = 1                                             #Initial variance.
-  beta            = 0.1                                           #Initial smoothness.
-  nu              = 0.5                                           #Initial range.
-  dmetric         = 0                                             #0 --> Euclidean distance, 1--> great circle distance.
-  n               = 1600                                          #n*n locations grid.
-  x               = rnorm(n = 1600, mean = 39.74, sd = 25.09)     #x measurements of n locations.
-  y               = rnorm(n = 1600, mean = 80.45, sd = 100.19)    #y measurements of n locations.
-  #Initiate exageostat instance
-  exageostat_init(hardware = list (
-    ncores = 2,
-    ngpus  = 0,
-    ts     = 320,
-    lts    = 0,
-    pgrid  = 1,
-    qgrid  = 1
-  ))#Initiate exageostat instance
-  #Generate Z observation vector based on given locations
-  data          = simulate_obs_exact(x, y, sigma_sq, beta, nu, dmetric)
-  #Estimate MLE parameters (Exact)
-  result        = exact_mle(data,
-                            dmetric,
-                            optimization = list(
-                              clb = c(0.001, 0.001, 0.001),
-                              cub = c(5, 5, 5),
-                              tol = 1e-4,
-                              max_iters = 4
-                            ))
-  #print(result)
-  #Finalize exageostat instance
-  exageostat_finalize()
-  browser()
-}
+utils::globalVariables(c("ncores"))
+utils::globalVariables(c("ngpus"))
+utils::globalVariables(c("dts"))
+utils::globalVariables(c("lts"))
+utils::globalVariables(c("pgrid"))
+utils::globalVariables(c("qgrid"))
+utils::globalVariables(c("x"))
+utils::globalVariables(c("y"))
+utils::globalVariables(c("z"))
 
 #' Simulate Geospatial data (x, y, z)
 #' @param sigma_sq A number - variance parameter
@@ -211,35 +45,16 @@ simulate_data_exact <-
            n,
            seed = 0)
   {
-    if(length(dmetric) > 1) 
-	    dmetric = dmetric[1]
-    if(tolower(dmetric) == "euclidean")
-	    dmetric = 0
-    else if(tolower(dmetric) == "great_circle")
-	    dmetric = 1
-    else
-	    stop("Invalid input for dmetric")
-    globalveclen = 3 * n
-    # globalvec  = vector (mode = "double", length = globalveclen)
-    globalvec2 = .C(
-      "gen_z_exact",
-      as.double(sigma_sq),
-      as.double(beta),
-      as.double(nu),
-      as.integer(dmetric),
-      as.integer(n),
-      as.integer(seed),
-      as.integer(ncores),
-      as.integer(ngpus),
-      as.integer(dts),
-      as.integer(pgrid),
-      as.integer(qgrid),
-      as.integer(globalveclen),
-      globalvec = double(globalveclen)
-    )$globalvec
-    
-    #               globalvec[1:globalveclen] <- globalvec2[1:globalveclen]
-    
+	  dmetric = arg_check_sim(sigma_sq, beta, nu, dmetric)
+	  assert_that(length(n) == 1)
+	  assert_that(n >= 1)
+	  assert_that(length(seed) == 1)
+    dmetric <- as.integer(dmetric)
+    n <- as.integer(n)
+    seed <- as.integer(seed)
+    globalveclen = as.integer(3 * n)
+    globalvec2 = .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, ncores, ngpus,
+      dts, pgrid, qgrid, globalveclen, globalvec = double(globalveclen))$globalvec
     newList <-
       list("x" = globalvec2[1:n],
            "y" = globalvec2[(n + 1):(2 * n)],
@@ -263,40 +78,17 @@ simulate_obs_exact <-
   function(x, y, sigma_sq, beta, nu, 
            dmetric = c("euclidean", "great_circle"))
   {
-    if(length(dmetric) > 1) 
-	    dmetric = dmetric[1]
-    if(tolower(dmetric) == "euclidean")
-	    dmetric = 0
-    else if(tolower(dmetric) == "great_circle")
-	    dmetric = 1
-    else
-	    stop("Invalid input for dmetric")
+	  dmetric = arg_check_sim(sigma_sq, beta, nu, dmetric)
+    assert_that(is.double(x))
+    assert_that(is.double(y))
+    assert_that(length(x) == length(y))
     n = length(x)
-    globalveclen = 3 * n
-    globalvec  = vector (mode = "double", length = globalveclen)
-    globalvec2 = .C(
-      "gen_z_givenlocs_exact",
-      as.double(x),
-      as.integer((n)),
-      as.double(y),
-      as.integer((n)),
-      as.double(sigma_sq),
-      as.double(beta),
-      as.double(nu),
-      as.integer(dmetric),
-      as.integer(n),
-      as.integer(ncores),
-      as.integer(ngpus),
-      as.integer(dts),
-      as.integer(pgrid),
-      as.integer(qgrid),
-      as.integer(globalveclen),
-      globalvec = double(globalveclen)
-    )$globalvec
-    #globalvec[1:globalveclen] <- globalvec2[1:globalveclen]
-    print(n)
-    print(globalveclen)
-    
+    dmetric <- as.integer(dmetric)
+    n <- as.integer(n)
+    globalveclen = as.integer(3 * n)
+    globalvec2 = .C("gen_z_givenlocs_exact", x, n, y, n, sigma_sq, beta, nu, dmetric,
+      n, ncores, ngpus, dts, pgrid, qgrid, globalveclen,
+      globalvec = double(globalveclen))$globalvec
     newList <- list("x" = x[1:n],
                     "y" = y[1:n],
                     "z" = globalvec2[1:n])
@@ -320,39 +112,15 @@ exact_mle <-
              max_iters = 100
            ))
   {
-    if(length(dmetric) > 1) 
-	    dmetric = dmetric[1]
-    if(tolower(dmetric) == "euclidean")
-	    dmetric = 0
-    else if(tolower(dmetric) == "great_circle")
-	    dmetric = 1
-    else
-	    stop("Invalid input for dmetric")
+	  dmetric = arg_check_mle(data, dmetric, optimization)
     n = length(data$x)
-    theta_out2 = .C(
-      "mle_exact",
-      as.double(data$x),
-      as.integer((n)),
-      as.double(data$y),
-      as.integer((n)),
-      as.double(data$z),
-      as.integer((n)) ,
-      as.double(optimization$clb),
-      as.integer((3)),
-      as.double(optimization$cub),
-      as.integer((3)),
-      as.integer(dmetric),
-      as.integer(n),
-      as.double(optimization$tol),
-      as.integer(optimization$max_iters),
-      as.integer(ncores),
-      as.integer(ngpus),
-      as.integer(dts),
-      as.integer(pgrid),
-      as.integer(qgrid),
-      theta_out = double(6)
-    )$theta_out
-    #theta_out[1:6] <- theta_out2[1:6]
+    dmetric <- as.integer(dmetric)
+    n <- as.integer(n)
+    optimization$max_iters <- as.integer(optimization$max_iters)
+    theta_out2 = .C("mle_exact", data$x, n, data$y, n, data$z, n , optimization$clb, 3,
+      optimization$cub, 3, dmetric, n, optimization$tol, optimization$max_iters, ncores,
+      ngpus, dts, pgrid, qgrid, theta_out = double(6))$theta_out
+
     print("back from mle_exact C function call. Hit key....")
     newList <-
       list(
@@ -386,41 +154,21 @@ tlr_mle <-
              max_iters = 100
            ))
   {
-    if(length(dmetric) > 1) 
-	    dmetric = dmetric[1]
-    if(tolower(dmetric) == "euclidean")
-	    dmetric = 0
-    else if(tolower(dmetric) == "great_circle")
-	    dmetric = 1
-    else
-	    stop("Invalid input for dmetric")
-    n = length(data$x)
-    theta_out2 = .C(
-      "mle_tlr",
-      as.double(data$x),
-      as.integer((n)),
-      as.double(data$y),
-      as.integer((n)),
-      as.double(data$z),
-      as.integer((n)) ,
-      as.double(optimization$clb),
-      as.integer((3)),
-      as.double(optimization$cub),
-      as.integer((3)),
-      as.integer(tlr_acc),
-      as.integer(tlr_maxrank),
-      as.integer(dmetric),
-      as.integer(n),
-      as.double(optimization$tol),
-      as.integer(optimization$max_iters),
-      as.integer(ncores),
-      as.integer(ngpus),
-      as.integer(lts),
-      as.integer(pgrid),
-      as.integer(qgrid),
-      theta_out = double(6)
+	  dmetric = arg_check_mle(data, dmetric, optimization)
+	  assert_that(length(tlr_acc) == 1)
+	  assert_that(length(tlr_maxrank) == 1)
+	  assert_that(tlr_acc > 0)
+	  assert_that(tlr_maxrank >= 1)
+    n <- length(data$x)
+    dmetric <- as.integer(dmetric)
+    n <- as.integer(n)
+    tlr_acc <- as.integer(tlr_acc)
+    tlr_maxrank <- as.integer(tlr_maxrank)
+    optimization$max_iters <- as.integer(optimization$max_iters)
+    theta_out2 = .C("mle_tlr", data$x, n, data$y, n, data$z, n , optimization$clb, 3,
+      optimization$cub, 3, tlr_acc, tlr_maxrank, dmetric, n, optimization$tol,
+      optimization$max_iters, ncores, ngpus, lts, pgrid, qgrid, theta_out = double(6)
     )$theta_out
-    #                               theta_out[1:6] <- theta_out2[1:6]
     print("back from mle_exact C function call. Hit key....")
     newList <-
       list(
@@ -451,39 +199,17 @@ dst_mle <-
              max_iters = 100
            ))
   {
-    if(length(dmetric) > 1) 
-	    dmetric = dmetric[1]
-    if(tolower(dmetric) == "euclidean")
-	    dmetric = 0
-    else if(tolower(dmetric) == "great_circle")
-	    dmetric = 1
-    else
-	    stop("Invalid input for dmetric")
-    n = length(data$x)
-    theta_out2 = .C(
-      "mle_dst",
-      as.double(data$x),
-      as.integer((n)),
-      as.double(data$y),
-      as.integer((n)),
-      as.double(data$z),
-      as.integer((n)) ,
-      as.double(optimization$clb),
-      as.integer((3)),
-      as.double(optimization$cub),
-      as.integer((3)),
-      as.integer(dst_thick),
-      as.integer(dmetric),
-      as.integer(n),
-      as.double(optimization$tol),
-      as.integer(optimization$max_iters),
-      as.integer(ncores),
-      as.integer(ngpus),
-      as.integer(dts),
-      as.integer(pgrid),
-      as.integer(qgrid),
-      theta_out = double(6)
-    )$theta_out
+	  dmetric = arg_check_mle(data, dmetric, optimization)
+	  assert_that(length(dst_thick) == 1)
+	  assert_that(dst_thick >= 1)
+    n <- length(data$x)
+    dmetric <- as.integer(dmetric)
+    n <- as.integer(n)
+    dst_thick <- as.integer(dst_thick)
+    optimization$max_iters <- as.integer(optimization$max_iters)
+    theta_out2 = .C("mle_dst", data$x, n, data$y, n, data$z, n , optimization$clb, 3,
+      optimization$cub, 3, dst_thick, dmetric, n, optimization$tol, optimization$max_iters,
+      ncores, ngpus, dts, pgrid, qgrid, theta_out = double(6))$theta_out
     print("back from mle_exact C function call. Hit key....")
     newList <-
       list(
@@ -505,31 +231,36 @@ dst_mle <-
 #' exageostat_init(hardware = list (ncores=1,  ngpus=2, ts=320, lts=0, pgrid=1,  qgrid=1 ))
 #' exageostat_init(hardware = list (ncores=26, ngpus=0, ts=320, lts=0, pgrid=3,  qgrid=4 ))
 exageostat_init <-
-  function(hardware = list (
-    ncores = 2,
-    ngpus = 0,
-    ts = 320,
-    lts = 0,
-    pgrid = 1,
-    qgrid = 1
-  ))
+  function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1))
 {
-    ncores <<- hardware$ncores
-    ngpus <<- hardware$ngpus
-    dts <<- hardware$ts
-    lts <<- hardware$lts
-    pgrid <<- hardware$pgrid
-    qgrid <<- hardware$qgrid
+    ncores <- hardware$ncores
+    ngpus <- hardware$ngpus
+    dts <- hardware$ts
+    lts <- hardware$lts
+    pgrid <- hardware$pgrid
+    qgrid <- hardware$qgrid
+
+    ncores <- as.integer(ncores)
+    ngpus <- as.integer(ngpus)
+    dts <- as.integer(dts)
+    lts <- as.integer(lts)
+    pgrid <- as.integer(pgrid)
+    qgrid <- as.integer(qgrid)
+
+    assert_that(ncores > 0)
+    assert_that(ngpus > 0)
+    assert_that(dts > 0)
+    assert_that(lts >= 0)
+    assert_that(pgrid > 0)
+    assert_that(qgrid > 0)
+
     Sys.setenv(OMP_NUM_THREADS = 1)
     Sys.setenv(STARPU_CALIBRATE = 1)
     Sys.setenv(STARPU_SILENT = 1) 
     Sys.setenv(KMP_AFFINITY = "disabled")   
-    .C("rexageostat_init",
-       as.integer(ncores),
-       as.integer(ngpus),
-       as.integer(dts))
+    .C("rexageostat_init", ncores, ngpus, dts)
     print("back from exageostat_init C function call. Hit key....")
-  }
+}
 
 #' Finalize the current instance of ExaGeoStatR
 #' @return N/A
@@ -541,31 +272,52 @@ exageostat_finalize <- function()
   print("back from exageostat_finalize C function call. Hit key....")
 }
 
-check_lb_ub <- function(lb, ub)
+arg_check_sim <- function(sigma_sq, beta, nu, dmetric)
 {
-	if(!all(lb <= ub))
-		stop("Lower bounds should be no bigger than the upper bounds")
+	assert_that(is.double(sigma_sq))
+	assert_that(is.double(beta))
+	assert_that(is.double(nu))
+	assert_that(length(sigma_sq) == 1)
+	assert_that(length(beta) == 1)
+	assert_that(length(nu) == 1)
+	assert_that(sigma_sq > 0)
+	assert_that(beta > 0)
+	assert_that(nu > 0)
+	if(length(dmetric) > 1)
+            dmetric = dmetric[1]
+        if(tolower(dmetric) == "euclidean")
+            dmetric = 0
+        else if(tolower(dmetric) == "great_circle")
+            dmetric = 1
+        else
+            stop("Invalid input for dmetric")
+	return dmetric
 }
 
-check_positive <- function(...)
+arg_check_mle <- function(data, dmetric, optimization)
 {
-	args <- list(...)
-	argc <- length(args)
-	for(i in 1 : argc)
-		if(!all(args[[i]] > 0))
-			return i
-	return 0
-}
-
-check_same_length <- function(...)
-{
-	args <- list(...)
-	argc <- length(args)
-	if(argc == 0)
-		return TRUE
-	len <- length(args[[1]])
-	for(i in 1 : argc)
-		if(length(args[[i]]) != len)
-			return FALSE
-	return TRUE
+	assert_that(length(data$x) == length(data$y))
+	assert_that(length(data$x) == length(data$z))
+	assert_that(is.double(data$x))
+	assert_that(is.double(data$y))
+	assert_that(is.double(data$z))
+	assert_that(is.double(optimization$clb))
+	assert_that(is.double(optimization$cub))
+	assert_that(is.double(optimization$tol))
+	assert_that(length(optimization$clb) == 3)
+	assert_that(length(optimization$cub) == 3)
+	assert_that(length(optimization$tol) == 1)
+	assert_that(length(optimization$max_iters) == 1)
+	assert_that(all(optimization$clb <= optimization$cub))
+	assert_that(optimization$tol > 0)
+	assert_that(optimization$max_iters >= 1)
+	if(length(dmetric) > 1)
+            dmetric = dmetric[1]
+        if(tolower(dmetric) == "euclidean")
+            dmetric = 0
+        else if(tolower(dmetric) == "great_circle")
+            dmetric = 1
+        else
+            stop("Invalid input for dmetric")
+	return dmetric
 }
