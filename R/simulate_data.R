@@ -36,7 +36,16 @@ utils::globalVariables(c("z"))
 #' @param seed  A number -  seed of random generation
 #' @return a list of of three vectors (x, y, z)
 #' @examples
-#' data = simulate_data_exact( sigma_sq, beta, nu, dmetric, seed)
+#' seed = 0  ##Initial seed to generate XY locs.
+#' sigma_sq = 1 ##Initial variance.
+#' beta = 0.1 ##Initial smoothness.
+#' nu = 0.5 ##Initial range.
+#' dmetric = "euclidean" ##"euclidean" or "great_circle" distance.
+#' n = 1600 ## The number of locations (n must be a square number, n=m^2).
+#' exageostat_init(hardware = list (ncores = 2, ngpus = 0, ts = 320, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
+#' data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ##Generate Z observation vector
+#' data
+#' exageostat_finalize() ##Finalize exageostat instance
 simulate_data_exact <-
   function(sigma_sq,
            beta,

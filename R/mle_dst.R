@@ -33,6 +33,20 @@ utils::globalVariables(c("z"))
 #' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
 #' @param optimization  A list of opt lb (clb), opt ub (cub), tol, max_iters
 #' @return vector of three values (theta1, theta2, theta3)
+#' @examples
+#' seed = 0  ##Initial seed to generate XY locs.
+#' sigma_sq = 1 ##Initial variance.
+#' beta = 0.03 ##Initial smoothness.
+#' nu = 0.5 ##Initial range.
+#' dmetric = "euclidean" ##"euclidean" or "great_circle" distance.
+#' n = 900 ## The number of locations (n must be a square number, n=m^2).
+#' dst_thick = 3 ##Number of used Diagonal Super Tile (DST).
+#' exageostat_init(hardware = list (ncores = 4, ngpus = 0, ts = 320, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
+#' data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ##Generate Z observation vector
+#' ##Estimate MLE parameters (TLR approximation)
+#' result = dst_mle(data, dst_thick, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-4, max_iters = 4))
+#' print(result)
+#' exageostat_finalize() ##Finalize exageostat instance
 dst_mle <-
   function(data = list (x, y, z),
            dst_thick,
