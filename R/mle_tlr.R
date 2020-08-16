@@ -39,7 +39,7 @@ utils::globalVariables(c("z"))
 #' sigma_sq = 1 ##Initial variance.
 #' beta = 0.03 ##Initial smoothness.
 #' nu = 0.5 ##Initial range.
-#' dmetric = 0 ##0 --> Euclidean distance, 1--> great circle distance.
+#' dmetric = "euclidean" ##"euclidean" or "great_circle" distance.
 #' n = 900 ## The number of locations (n must be a square number, n=m^2).
 #' tlr_acc = 7 ##Approximation accuracy 10^-(acc)
 #' tlr_maxrank = 150 ##Max Rank

@@ -40,7 +40,7 @@ utils::globalVariables(c("z"))
 #' sigma_sq = 1 ##Initial variance.
 #' beta = 0.1 ##Initial smoothness.
 #' nu = 0.5 ##Initial range.
-#' dmetric = 0 ##0 --> Euclidean distance, 1--> great circle distance.
+#' dmetric = "euclidean" ##"euclidean" or "great_circle" distance.
 #' n = 1600 ## The number of locations (n must be a square number, n=m^2).
 #' exageostat_init(hardware = list (ncores = 2, ngpus = 0, ts = 320, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
 #' data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ##Generate Z observation vector
