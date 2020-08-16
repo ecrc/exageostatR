@@ -14,7 +14,7 @@ The functions in R generally use descriptive values for parameters instead of in
 
 7-Add more analysis functions (ploting, ...etc)   (Yuxiao/Jian)
   a- summary function to summarize the results.
-  b- print function (i.e., covariance matrix).
+  b- plot function (i.e., covariance matrix).
 
 8-I would suggest styling the package code using "styler" package. 
 The package does not adhere to general suggestions regarding R code specified in neither "R packages" (http://r-pkgs.had.co.nz/) nor "Writing R Extensions" (https://cran.r-project.org/doc/manuals/r-release/R-exts.html). (Yuxiao) 
