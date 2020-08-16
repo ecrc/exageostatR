@@ -46,7 +46,7 @@ arg_check_sim <- function(sigma_sq, beta, nu, dmetric)
             dmetric = 1
         else
             stop("Invalid input for dmetric")
-	return dmetric
+	return(dmetric)
 }
 
 arg_check_mle <- function(data, dmetric, optimization)
@@ -74,5 +74,5 @@ arg_check_mle <- function(data, dmetric, optimization)
             dmetric = 1
         else
             stop("Invalid input for dmetric")
-	return dmetric
+	return(dmetric)
 }

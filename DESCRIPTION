@@ -12,7 +12,7 @@ Title: R Package Demonstrates the R / C Language Interface for
         Exageostat
 Author: Sameh Abdulah <sameh.abdulah@kaust.edu.sa>
 Maintainer: Sameh Abdulah <sameh.abdulah@kaust.edu.sa>
-Depends: R (>= 2.0.1) assertthat(>= 0.2.1)
+Depends: R (>= 2.0.1), assertthat (>= 0.2.1)
 Description: An R-wrapper for ExaGeoStat: a parallel high performance
 	     unified framework for geostatistics on  manycore systems.
 	     Its abbreviation stands for Exascale Geostatistics. The
