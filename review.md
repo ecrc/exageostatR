@@ -20,3 +20,9 @@ The functions in R generally use descriptive values for parameters instead of in
 The package does not adhere to general suggestions regarding R code specified in neither "R packages" (http://r-pkgs.had.co.nz/) nor "Writing R Extensions" (https://cran.r-project.org/doc/manuals/r-release/R-exts.html). (Yuxiao) 
 
 We should send both a paper and a strong response doument
+
+TODO:
+
+Generate the new RD files.
+R CMD INSTALL -l /path/lib  
+
