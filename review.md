@@ -23,7 +23,8 @@ We should send both a paper and a strong response doument
 
 TODO:
 
-Generate the new RD files:1. document() 2.build_manual(pkg = ".", path = "./")
+1- Generate the new RD files:1. document() 
 
-R CMD INSTALL -l /path/lib  
+2.build_manual(pkg = ".", path = "./")
+
 
