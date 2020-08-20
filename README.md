@@ -22,8 +22,6 @@ Getting Started
 ```r
 install.packages("devtools")
 library("devtools")
-Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),
-"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 Sys.setenv(MKLROOT="/opt/intel/mkl")
 install_git(url="https://github.com/ecrc/exageostatR")
 ```
@@ -33,8 +31,6 @@ install_git(url="https://github.com/ecrc/exageostatR")
 ```r
 install.packages("devtools")
 library("devtools")
-Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),
-"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 Sys.setenv(MKLROOT="/opt/intel/mkl")
 Sys.setenv(MAKE="make -j 1")
 install_git(url="https://github.com/ecrc/exageostatR")
@@ -45,8 +41,6 @@ install_git(url="https://github.com/ecrc/exageostatR")
 ```r
 install.packages("devtools")
 library("devtools")
-Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),
-"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 Sys.setenv(MKLROOT="/opt/intel/mkl")
 install_git(url="https://github.com/ecrc/exageostatR", configure.args=C('--enable-cuda'))
 ```
