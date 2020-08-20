@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Configure script for R package generation
 #
@@ -9,32 +9,8 @@
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:${R_HOME}/exageostat/lib/pkgconfig
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_LIBS_USER/exageostat/lib/pkgconfig
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_LIBS/exageostat/lib/pkgconfig
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_PACKAGE_DIR/exageostat/lib/pkgconfig # if user uses -l option
-
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${R_HOME}/exageostat/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_LIBS_USER/exageostat/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_LIBS/exageostat/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_PACKAGE_DIR/exageostat/lib
-
-#export CPATH=$CPATH:$R_INCLUDE_DIR
 
 
-#export CPATH=$R_INCLUDE_DIR
-#export C_INCLUDE_PATH=$R_INCLUDE_DIR
-#export CPLUS_INCLUDE_PATH=$R_INCLUDE_DIR
-#export GCC_INCLUDE_DIR=$R_INCLUDE_DIR
-#STRARPU_HOME=$TMPDIR
-
-#echo"==========================================="
-#echo $TMPDIR
-#echo $OPENBLAS_ROOT
-#echo $OPEMBLASROOT
-echo $R_PACKAGE_DIR
-echo $R_INCLUDE_DIR
-echo ${R_HOME}
-#echo"============================================"
-#echo -e " \033[38;2;255;0;0m CMake is required and not found!"
-#echo -e " \033[0;0;0;0;0m"
 #Get the number of CPUs
 cpucores=`getconf _NPROCESSORS_ONLN`
 #cpucores=1
@@ -42,9 +18,7 @@ cpucores=`getconf _NPROCESSORS_ONLN`
 #VARIABLES
 MAKE=${MAKE:-make -j $(cpucores) -l $((cpucores + 1))}
 BASEDIR=$(pwd)
-#TMPDIR=$BASEDIR/_$$
-#export STARPU_HOME=~/trash"
-TMPDIR="/tmp/exageostatr"
+TMPDIR=$BASEDIR/_$$
 BUILD_DEPENDENCIES='true'
 err=0
 
@@ -106,7 +80,7 @@ done
 
 if [ -z "$SETUP_DIR" ]; then
 # Use RLIBS for setup dir
-arr=(`Rscript -e '.libPaths()' | awk '{Rprintf "%s ",$2}'`)
+arr=(`Rscript -e '.libPaths()' | awk '{printf "%s ",$2}'`)
 for i in ${!arr[*]};
 do
     dir=`echo ${arr[$i]}|tr -d \"`
@@ -180,24 +154,17 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SETUP_DIR/lib/pkgconfig
 # openblas
 if [ "true" == "$USE_OPENBLAS" ]
 then
-#obenblas will not be installed.
-     _OPENBLAS='true'
-#     _OPENBLAS='false'
+     _OPENBLAS='false'
      if pkg-config --exists openblas
-    then
+     then
          #check for lapacke.h
-    #    _LOCATION=`pkg-config --variable=includedir openblas`
-     #    if stat "${_LOCATION}/lapacke.h" >/dev/null 2>&1
-      #   then
+         _LOCATION=`pkg-config --variable=includedir openblas`
+         if stat "${_LOCATION}/lapacke.h" >/dev/null 2>&1
+         then
              _LOCATION=`pkg-config --variable=libdir openblas`
              echo "OpenBLAS FOUND in [$_LOCATION]"
              _OPENBLAS='true'
-        # fi
-     fi
-     if [ -n "$OPENBLAS_ROOT" ] && [ -d "$OPENBLAS_ROOT" ]; 
-     then
-             echo "OpenBLAS FOUND in [$OPENBLAS_ROOT]"
-             _OPENBLAS='true'
+         fi
      fi
      if [ "false" == "${_OPENBLAS}" ]
      then 
@@ -279,7 +246,7 @@ echo "==========================================="
 echo $PKG_CPPFLAGS
 echo "==========================================="
 
-#nm $PREFIX/lib/libopenblas.so | grep "LAPACKE_slarfb_work"
+nm $PREFIX/lib/libopenblas.so | grep "LAPACKE_slarfb_work"
 
 echo "==========================================="
 # nlopt
@@ -332,52 +299,8 @@ else
     fi
 fi
 
-
-
-if pkg-config --exists  libstarpu-1.2
- then 
- echo " libstarpu-1.2  exist"
- else
-echo "libstarpu-1.2 not exist"
-fi
-
-if pkg-config --exists  starpu-1.2
- then 
- echo " starpu-1.2  exist"
- else 
-echo "starpu-1.2 not exist"
-fi
-
-if pkg-config --exists  libstarpu-1.3
- then 
- echo " libstarpu-1.3  exist"
- else echo "libstarpu-1.3 not exist"
-fi
-
-if pkg-config --exists  starpu-1.3
- then 
- echo " starpu-1.3  exist"
- else 
-echo "starpu-1.3 not exist"
-fi
-if pkg-config --exists  libstarpu
-then 
- echo " libstarpu  exist"
- else
- echo "libstarpu not exist"
-fi
-if pkg-config --exists  starpu
- then 
- echo " starpu  exist"
- else
-echo "starpu not exist"
-
-fi
-
-
 # StarPU
-if pkg-config --exists  starpu-1.2
-
+if pkg-config --exists --atleast-version=1.2 libstarpu
 then
     _LOCATION=`pkg-config --variable=prefix libstarpu`
     echo "StarPU FOUND in [$_LOCATION]"
@@ -386,22 +309,13 @@ else
     then
         echo "Building StarPU..."
         cd $TMPDIR
-        wget http://starpu.gforge.inria.fr/files/starpu-1.2.9/starpu-1.2.9.tar.gz -O - | tar -zx
-        cd starpu-1.2.9
+        wget http://starpu.gforge.inria.fr/files/starpu-1.2.5/starpu-1.2.5.tar.gz -O - | tar -zx
+        cd starpu-1.2.5
         if [ "$CUDAVALUE" == "ON" ]; then
-		if [ "$MPIVALUE" == "ON" ]; then
-        		CFLAGS=-Wno-implicit-function-declaration ./configure --disable-starpufft --enable-cuda --disable-opencl --prefix=$PREFIX   --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --with-perf-model-dir=$TMPDIR  --disable-fstack-protector-all
-		else
-                        CFLAGS=-Wno-implicit-function-declaration ./configure --disable-starpufft --enable-cuda --disable-opencl --prefix=$PREFIX   --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all
-		fi
-	else
-                if [ "$MPIVALUE" == "ON" ]; then
-	        	CFLAGS=-Wno-implicit-function-declaration ./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX  --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples  --disable-fortran --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all
-		else
-                        CFLAGS=-Wno-implicit-function-declaration  ./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --disable-glpk --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all
-		fi	
-	fi
-
+            ./configure --enable-cuda --disable-opencl --prefix=$PREFIX  --enable-blas-lib=none
+        else
+            ./configure --disable-cuda --disable-opencl --prefix=$PREFIX --enable-blas-lib=none
+        fi
         $MAKE || $MAKE VERBOSE=1 || { echo 'STARPU installation failed' ; exit 1; }
         $MAKE install
     else
@@ -414,20 +328,6 @@ else
     fi
 fi
 
-#echo "???????????????"
-#cp $BASEDIR/src/libs/libudev.so.1 $PREFIX/lib
-#cp $BASEDIR/src/libs/libudev.so $PREFIX/lib
-#echo "????????????"
-
-echo "============STARPU======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
-
-#echo "Sameh ======================================"
-#echo "$(ls $PREFIX/lib)"
-#echo "======================================"
-
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PREFIX/lib
 
 cd $BASEDIR
 set -x
@@ -440,11 +340,10 @@ else
     if [ "$BUILD_DEPENDENCIES" == "true" ]
     then
         echo "Building CHAMELEON..."
-	cp -r $BASEDIR/src/hicma $TMPDIR/h
-        cd $TMPDIR/h/chameleon
+        cd $BASEDIR/src/hicma/chameleon
         mkdir -p build && cd build
         rm -rf ./CMake*
-        LDFLAGS="-L$PREFIX/lib" cmake -DCMAKE_C_FLAGS=-fPIC -DCHAMELEON_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DCHAMELEON_USE_CUDA=$CUDAVALUE -DCHAMELEON_ENABLE_EXAMPLE=OFF -DCHAMELEON_ENABLE_TESTING=OFF -DCHAMELEON_ENABLE_TIMING=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$DEFINE_BLAS_LIBS_CMAKE" ..
+        cmake -DCHAMELEON_USE_MPI=$MPIVALUE -DCHAMELEON_USE_CUDA=$CUDAVALUE -DCHAMELEON_ENABLE_EXAMPLE=OFF -DCHAMELEON_ENABLE_TESTING=OFF -DCHAMELEON_ENABLE_TIMING=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=$PREFIX "$DEFINE_BLAS_LIBS_CMAKE" ..
         $MAKE || $MAKE VERBOSE=1 || { echo 'CHAMELEON installation failed' ; exit 1; }
         $MAKE install
     else
@@ -457,11 +356,6 @@ else
     fi
 fi
 
-
-echo "============CHAMELEON======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
-
 # starsh
 if pkg-config --exists --atleast-version=0.1.1 starsh
 then
@@ -471,12 +365,10 @@ else
     if [ "$BUILD_DEPENDENCIES" == "true" ]
     then
         echo "Building STARS-H..."
-        #cd $BASEDIR/src/stars-h
-        cp -r $BASEDIR/src/stars-h $TMPDIR
-        cd $TMPDIR/stars-h
+        cd $BASEDIR/src/stars-h
         mkdir -p build && cd build
         rm -rf ./CMake*
-        cmake -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DOPENMP=OFF -DSTARPU=OFF  -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
+        cmake -DCMAKE_C_FLAGS=-fPIC -DOPENMP=OFF -DSTARPU=OFF  -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
         $MAKE || $MAKE VERBOSE=1 || { echo 'STARS-H installation failed' ; exit 1; }
         $MAKE install
     else
@@ -489,9 +381,6 @@ else
     fi
 fi
 
-echo "============STARSH======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
 # hicma
 if pkg-config --exists  hicma
 then
@@ -501,12 +390,10 @@ else
     if [ "$BUILD_DEPENDENCIES" == "true" ]
     then
         echo "Building HiCMA..."
-        #cd $BASEDIR/src/h/
-        #cp -r $BASEDIR/src/h $TMPDIR
-        cd $TMPDIR/h
+        cd $BASEDIR/src/hicma/
         mkdir -p build && cd build
         rm -rf ./CMake*
-        cmake -DHICMA_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DHICMA_ENABLE_TESTING=OFF -DHICMA_ENABLE_TIMING=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
+        cmake -DHICMA_USE_MPI=$MPIVALUE -DBUILD_SHARED_LIBS=ON -DHICMA_ENABLE_TESTING=OFF -DHICMA_ENABLE_TIMING=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
         $MAKE || $MAKE VERBOSE=1 || { echo 'HICMA installation failed' ; exit 1; }
         $MAKE install
     else
@@ -519,20 +406,16 @@ else
     fi
 fi
 
-echo "============HICMA======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
 # use rpaths in makefile
-# TODO use a R defined value for PREFIX and have this directly in the Makefile
+# TODO use a R defined value por PREFIX and have this directly in the Makefile
 
 #Dummy makefile in src to trigger real one from cmake.
 cd $BASEDIR/
 rm -rf ./CMakeFiles ./CMakeCache.txt
- cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DEXAGEOSTAT_EXAMPLES=OFF "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" -DEXAGEOSTAT_USE_MPI=$MPIVALUE -DEXAGEOSTAT_USE_HICMA=ON ./src
-echo "============EXAGEOSTAT======================"
+cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast" -DBUILD_SHARED_LIBS=ON -DEXAGEOSTAT_EXAMPLES=OFF "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" -DEXAGEOSTAT_USE_MPI=$MPIVALUE -DEXAGEOSTAT_USE_HICMA=ON ./src
+echo "======================================"
 echo "$(ls $PREFIX/lib)"
 echo "======================================"
-
 
 cat > src/Makefile << EOF
 .PHONY: all clean
