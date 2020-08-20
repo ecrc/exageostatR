@@ -1,4 +1,4 @@
-1- The package is only available for Linux/MacOS, which misses a significant number of Windows users. Is there any chance to port the package to Windows? The reasoning why the package is not available on Windows should be explained.   (Sameh)  --- check docker as an alternative
+- The package is only available for Linux/MacOS, which misses a significant number of Windows users. Is there any chance to port the package to Windows? The reasoning why the package is not available on Windows should be explained.   (Sameh)  --- check docker as an alternative
 
 2-The whole code of the package wraps calls to C library without doing much else. The functions should at least check input values for types and output error messages directly from R. Right now the functions will fail on conversions inside C functions call (i.e. as.integer() in .C() call). The produced error will not be very helpful for users. Package "assertthat" could be helpful authors there. (Jian) done -- pushed
 
@@ -23,7 +23,11 @@ We should send both a paper and a strong response doument
 
 TODO:
 
-1- Generate the new RD files:1. document() 
+1- Generate the new RD files:
+
+ library(roxygen2)
+
+roxygenise()
 
 2.build_manual(pkg = ".", path = "./")
 
