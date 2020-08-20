@@ -15,6 +15,8 @@
  # @author Sameh Abdulah
  # @date 2019-01-17
 library("exageostatr")                                                   #Load ExaGeoStat-R lib.
+#Sys.setenv(STARPU_HOME = tempdir())
+#Sys.setenv(STARPU_HOME = "~/trash")
 sigma_sq        = 1                                                     #Initial variance.
 beta            = 0.1                                                   #Initial smoothness.
 nu 	        = 0.5                                                   #Initial range.
@@ -27,7 +29,7 @@ exageostat_init(hardware = list (ncores=2, ngpus=0, ts=320, lts=0,  pgrid=1, qgr
 #Generate Z observation vector based on given locations
 data          = simulate_obs_exact( x, y, sigma_sq, beta, nu, dmetric)
 #Estimate MLE parameters (Exact)
-result        = exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 20))
+result        = exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 3))
 #print(result)
 #Finalize exageostat instance
 exageostat_finalize()
