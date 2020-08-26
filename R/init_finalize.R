@@ -31,12 +31,11 @@ utils::globalVariables(c("z"))
 #' @param hardware A list of ncores, ngpus, tile size, pgrid, and qgrid
 #' @return N/A
 #' @examples
-#' exageostat_init(hardware = list (ncores=2,  ngpus=0, ts=320, lts=0, pgrid=1,  qgrid=1 ))
-#' exageostat_init(hardware = list (ncores=1,  ngpus=2, ts=320, lts=0, pgrid=1,  qgrid=1 ))
-#' exageostat_init(hardware = list (ncores=26, ngpus=0, ts=320, lts=0, pgrid=3,  qgrid=4 ))
+#' exageostat_init(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1))
+#' exageostat_init(hardware = list(ncores = 1, ngpus = 2, ts = 320, lts = 0, pgrid = 1, qgrid = 1))
+#' exageostat_init(hardware = list(ncores = 26, ngpus = 0, ts = 320, lts = 0, pgrid = 3, qgrid = 4))
 exageostat_init <-
-  function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1))
-{
+  function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) {
     ncores <- hardware$ncores
     ngpus <- hardware$ngpus
     dts <- hardware$ts
@@ -60,19 +59,17 @@ exageostat_init <-
 
     Sys.setenv(OMP_NUM_THREADS = 1)
     Sys.setenv(STARPU_CALIBRATE = 1)
-    Sys.setenv(STARPU_SILENT = 1) 
-    Sys.setenv(KMP_AFFINITY = "disabled")   
+    Sys.setenv(STARPU_SILENT = 1)
+    Sys.setenv(KMP_AFFINITY = "disabled")
     .C("rexageostat_init", ncores, ngpus, dts)
     print("back from exageostat_init C function call. Hit key....")
-}
+  }
 
 #' Finalize the current instance of ExaGeoStatR
 #' @return N/A
 #' @examples
 #' exageostat_finalize()
-exageostat_finalize <- function()
-{
+exageostat_finalize <- function() {
   .C("rexageostat_finalize")
   print("back from exageostat_finalize C function call. Hit key....")
 }
-
