@@ -35,22 +35,22 @@ utils::globalVariables(c("z"))
 #' @param optimization  A list of opt lb values (clb), opt ub values (cub), tol, max_iters
 #' @return vector of three values (theta1, theta2, theta3)
 #' @examples
-#' seed <- 0 ## Initial seed to generate XY locs.
-#' sigma_sq <- 1 ## Initial variance.
-#' beta <- 0.03 ## Initial smoothness.
-#' nu <- 0.5 ## Initial range.
-#' dmetric <- "euclidean" ## "euclidean" or "great_circle" distance.
-#' n <- 900 ## The number of locations (n must be a square number, n=m^2).
-#' tlr_acc <- 7 ## Approximation accuracy 10^-(acc)
-#' tlr_maxrank <- 150 ## Max Rank
-#' exageostat_init(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 600, pgrid = 1, qgrid = 1)) ## Initiate exageostat instance
-#' data <- simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ## Generate Z observation vector
-#' ## Estimate MLE parameters (TLR approximation)
-#' result <- tlr_mle(data, tlr_acc, tlr_maxrank, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-4, max_iters = 4))
+#' seed = 0  ##Initial seed to generate XY locs.
+#' sigma_sq = 1 ##Initial variance.
+#' beta = 0.03 ##Initial smoothness.
+#' nu = 0.5 ##Initial range.
+#' dmetric = "euclidean" ##"euclidean" or "great_circle" distance.
+#' n = 900 ## The number of locations (n must be a square number, n=m^2).
+#' tlr_acc = 7 ##Approximation accuracy 10^-(acc)
+#' tlr_maxrank = 150 ##Max Rank
+#' exageostat_init(hardware = list (ncores = 2, ngpus = 0, ts = 320, lts = 600, pgrid  = 1, qgrid  = 1)) ##Initiate exageostat instance
+#' data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ##Generate Z observation vector
+#' ##Estimate MLE parameters (TLR approximation)
+#' result = tlr_mle(data, tlr_acc, tlr_maxrank, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-4, max_iters = 4))
 #' print(result)
-#' exageostat_finalize() ## Finalize exageostat instance
+#' exageostat_finalize() ##Finalize exageostat instance
 tlr_mle <-
-  function(data = list(x, y, z),
+  function(data = list (x, y, z),
            tlr_acc = 9,
            tlr_maxrank = 400,
            dmetric = c("euclidean", "great_circle"),
@@ -59,22 +59,22 @@ tlr_mle <-
              cub = c(5, 5, 5),
              tol = 1e-4,
              max_iters = 100
-           )) {
-    dmetric <- arg_check_mle(data, dmetric, optimization)
-    assert_that(length(tlr_acc) == 1)
-    assert_that(length(tlr_maxrank) == 1)
-    assert_that(tlr_acc > 0)
-    assert_that(tlr_maxrank >= 1)
+           ))
+  {
+	  dmetric = arg_check_mle(data, dmetric, optimization)
+	  assert_that(length(tlr_acc) == 1)
+	  assert_that(length(tlr_maxrank) == 1)
+	  assert_that(tlr_acc > 0)
+	  assert_that(tlr_maxrank >= 1)
     n <- length(data$x)
     dmetric <- as.integer(dmetric)
     n <- as.integer(n)
     tlr_acc <- as.integer(tlr_acc)
     tlr_maxrank <- as.integer(tlr_maxrank)
     optimization$max_iters <- as.integer(optimization$max_iters)
-    theta_out2 <- .C("mle_tlr", data$x, n, data$y, n, data$z, n, optimization$clb, 3,
+    theta_out2 = .C("mle_tlr", data$x, n, data$y, n, data$z, n , optimization$clb, 3,
       optimization$cub, 3, tlr_acc, tlr_maxrank, dmetric, n, optimization$tol,
-      optimization$max_iters, ncores, ngpus, lts, pgrid, qgrid,
-      theta_out = double(6)
+      optimization$max_iters, ncores, ngpus, lts, pgrid, qgrid, theta_out = double(6)
     )$theta_out
     print("back from mle_exact C function call. Hit key....")
     newList <-
@@ -88,3 +88,4 @@ tlr_mle <-
       )
     return(newList)
   }
+
