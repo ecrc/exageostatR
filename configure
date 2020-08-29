@@ -440,8 +440,15 @@ else
     if [ "$BUILD_DEPENDENCIES" == "true" ]
     then
         echo "Building CHAMELEON..."
-	cp -r $BASEDIR/src/hicma $TMPDIR/h
-        cd $TMPDIR/h/chameleon
+        cd $TMPDIR
+        rm -rf h
+        git clone https://github.com/ecrc/hicma h
+        cd h
+        git submodule update --init --recursive 2>&1 >/dev/null || true
+        cd chameleon
+        git checkout 2803719fc79986242d17f79c7bb706b499adef23
+  	    #cp -r $BASEDIR/src/hicma $TMPDIR/h
+        #cd $TMPDIR/h/chameleon
         mkdir -p build && cd build
         rm -rf ./CMake*
         LDFLAGS="-L$PREFIX/lib" cmake -DCMAKE_C_FLAGS=-fPIC -DCHAMELEON_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DCHAMELEON_USE_CUDA=$CUDAVALUE -DCHAMELEON_ENABLE_EXAMPLE=OFF -DCHAMELEON_ENABLE_TESTING=OFF -DCHAMELEON_ENABLE_TIMING=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$DEFINE_BLAS_LIBS_CMAKE" ..
@@ -472,8 +479,14 @@ else
     then
         echo "Building STARS-H..."
         #cd $BASEDIR/src/stars-h
-        cp -r $BASEDIR/src/stars-h $TMPDIR
-        cd $TMPDIR/stars-h
+        cd $TMPDIR
+        rm -rf stars-h
+        git clone https://github.com/ecrc/stars-h stars-h
+        cd stars-h
+        git checkout 687c2dc6df085655959439c38a40ccbe7cb57f82
+        git submodule update --init --recursive 2>&1 >/dev/null || true
+        #cp -r $BASEDIR/src/stars-h $TMPDIR
+        #cd $TMPDIR/stars-h
         mkdir -p build && cd build
         rm -rf ./CMake*
         cmake -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DOPENMP=OFF -DSTARPU=OFF  -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
@@ -503,7 +516,11 @@ else
         echo "Building HiCMA..."
         #cd $BASEDIR/src/h/
         #cp -r $BASEDIR/src/h $TMPDIR
-        cd $TMPDIR/h
+        # cd $TMPDIR/h
+        #git clone https://github.com/ecrc/stars-h stars-h
+        cd $TMPDIR
+        cd h
+        git checkout c8287eed9ea9a803fc88ab067426ac6baacaa534
         mkdir -p build && cd build
         rm -rf ./CMake*
         cmake -DHICMA_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DHICMA_ENABLE_TESTING=OFF -DHICMA_ENABLE_TIMING=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
@@ -528,16 +545,27 @@ echo "======================================"
 #Dummy makefile in src to trigger real one from cmake.
 cd $BASEDIR/
 rm -rf ./CMakeFiles ./CMakeCache.txt
- cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DEXAGEOSTAT_EXAMPLES=OFF "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" -DEXAGEOSTAT_USE_MPI=$MPIVALUE -DEXAGEOSTAT_USE_HICMA=ON ./src
+cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DEXAGEOSTAT_EXAMPLES=OFF "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" -DEXAGEOSTAT_USE_MPI=$MPIVALUE -DEXAGEOSTAT_USE_HICMA=ON ./src
 echo "============EXAGEOSTAT======================"
 echo "$(ls $PREFIX/lib)"
 echo "======================================"
-
+echo "$(ls ./src)"
+echo "======================================"
+echo "$(ls ../)"
+echo "======================================"
+echo "$(ls ../src)"
+echo "======================================"
+echo "$(ls ../exageostatr)"
+echo "======================================"
+echo "$(find ../ -name exageostat.so)"
+echo "======================================"
+echo "$(find ../ -name "exageostat.so")"
+echo "======================================"
 
 cat > src/Makefile << EOF
 .PHONY: all clean
 all:
-	(cd .. && make VERBOSE=1 && cp ./lib*.${LIBEXT} ./src/exageostat.so)
+(cd .. && make VERBOSE=1 && cp ./lib*.${LIBEXT} ./src/exageostat.so)
 
 EOF
 
