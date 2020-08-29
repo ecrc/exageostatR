@@ -520,7 +520,7 @@ else
         #git clone https://github.com/ecrc/stars-h stars-h
         cd $TMPDIR
         cd h
-        git checkout 713999442ff57963927fa5823b8c57ad58e643ef
+        git checkout c8287eed9ea9a803fc88ab067426ac6baacaa534
         mkdir -p build && cd build
         rm -rf ./CMake*
         cmake -DHICMA_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DHICMA_ENABLE_TESTING=OFF -DHICMA_ENABLE_TIMING=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
