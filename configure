@@ -565,7 +565,8 @@ echo "======================================"
 cat > src/Makefile << EOF
 .PHONY: all clean
 all:
-        (cd .. && make VERBOSE=1 && cp ./lib*.${LIBEXT} ./src/exageostat.so)
-EOF
+	(cd .. && make VERBOSE=1 && cp ./lib*.${LIBEXT} ./src/exageostat.so)
 
+EOF
 exit $err
+
