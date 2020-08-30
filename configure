@@ -11,10 +11,10 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_LIBS_USER/exageostat/lib/pkgconfig
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_LIBS/exageostat/lib/pkgconfig
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_PACKAGE_DIR/exageostat/lib/pkgconfig # if user uses -l option
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${R_HOME}/exageostat/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_LIBS_USER/exageostat/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_LIBS/exageostat/lib
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_PACKAGE_DIR/exageostat/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${R_HOME}/exageostat/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_LIBS_USER/exageostat/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_LIBS/exageostat/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_PACKAGE_DIR/exageostat/lib
 
 #export CPATH=$CPATH:$R_INCLUDE_DIR
 
