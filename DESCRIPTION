@@ -6,7 +6,7 @@ SystemRequirements: GNU Make, GNU CMake, GCC Compiler Suite (C and
         (https://github.com/xianyi/OpenBLAS/releases), cblas
         (https://github.com/xianyi/OpenBLAS/releases), hwloc (>=1.11.5
         https://www.open-mpi.org), gsl (>= 2.4 https://ftp.gnu.org)
-Version: 0.1.1
+Version: 1.0.1
 Date: 2020-08-30
 Title: R Package Demonstrates the R / C Language Interface for
         Exageostat
