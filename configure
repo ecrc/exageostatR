@@ -32,6 +32,11 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_PACKAGE_DIR/exageostat/lib/pkgconfig 
 echo $R_PACKAGE_DIR
 echo $R_INCLUDE_DIR
 echo ${R_HOME}
+echo ${TMPDIR}
+echo ${TEMPDIR}
+echo ${TMPDIR}
+echo ${TMP}
+echo ${TEMP}
 #echo"============================================"
 #echo -e " \033[38;2;255;0;0m CMake is required and not found!"
 #echo -e " \033[0;0;0;0;0m"
@@ -42,7 +47,7 @@ cpucores=`getconf _NPROCESSORS_ONLN`
 #VARIABLES
 MAKE=${MAKE:-make -j $(cpucores) -l $((cpucores + 1))}
 BASEDIR=$(pwd)
-TMPDIR=$BASEDIR/_$$
+#TMPDIR=$BASEDIR/_$$
 #export STARPU_HOME=~/trash"
 #TMPDIR="/tmp/exageostatr"
 BUILD_DEPENDENCIES='true'
