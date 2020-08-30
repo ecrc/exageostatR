@@ -25,10 +25,10 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_PACKAGE_DIR/exageostat/lib/pkgconfig 
 #export GCC_INCLUDE_DIR=$R_INCLUDE_DIR
 #STRARPU_HOME=$TMPDIR
 
-echo"==========================================="
-#echo $TMPDIR
-#echo $OPENBLAS_ROOT
-#echo $OPEMBLASROOT
+echo "==========================================="
+echo $TMPDIR
+echo $OPENBLAS_ROOT
+echo $OPEMBLASROOT
 echo $R_PACKAGE_DIR
 echo $R_INCLUDE_DIR
 echo ${R_HOME}
@@ -37,7 +37,7 @@ echo ${TEMPDIR}
 echo ${TMPDIR}
 echo ${TMP}
 echo ${TEMP}
-echo"============================================"
+echo "============================================"
 #echo -e " \033[38;2;255;0;0m CMake is required and not found!"
 #echo -e " \033[0;0;0;0;0m"
 #Get the number of CPUs
