@@ -26,3 +26,4 @@ Packaged: 2020-08-30 04:04:27 UTC; abdullsm
 OS_type: unix
 RoxygenNote: 7.1.1
 NeedsCompilation: yes
+StagedInstall: no
