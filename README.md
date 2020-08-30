@@ -20,7 +20,6 @@ Getting Started
 
 #### Install latest ExaGeoStatR version hosted on GitHub(parallel installation)
 ```r
-install.packages("devtools")
 library("devtools")
 Sys.setenv(MKLROOT="/opt/intel/mkl")
 install_git(url="https://github.com/ecrc/exageostatR")
@@ -29,7 +28,6 @@ install_git(url="https://github.com/ecrc/exageostatR")
 
 #### Install latest ExaGeoStatR version hosted on GitHub (sequential installation)
 ```r
-install.packages("devtools")
 library("devtools")
 Sys.setenv(MKLROOT="/opt/intel/mkl")
 Sys.setenv(MAKE="make -j 1")
@@ -39,7 +37,6 @@ install_git(url="https://github.com/ecrc/exageostatR")
 
 #### Install latest ExaGeoStatR version hosted on GitHub with GPU support
 ```r
-install.packages("devtools")
 library("devtools")
 Sys.setenv(MKLROOT="/opt/intel/mkl")
 install_git(url="https://github.com/ecrc/exageostatR", configure.args=C('--enable-cuda'))
@@ -47,19 +44,16 @@ install_git(url="https://github.com/ecrc/exageostatR", configure.args=C('--enabl
 
 #### Install latest ExaGeoStatR version hosted on GitHub with MPI support
 ```r
-install.packages("devtools")
 library("devtools")
-Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),
-"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 Sys.setenv(MKLROOT="/opt/intel/mkl")
 install_git(url="https://github.com/ecrc/exageostatR", configure.args=C('--enable-mpi'))
 ```
 
 [comment]: <> (#### Get the latest ExaGeoStatR release  hosted on GitHub)
-[comment]: <> (1. Download exageostat_1.0.0.tar.gz from release)
-[comment]: <> (2. Use R to install exageostat_1.0.0.tar.gz)
+[comment]: <> (1. Download exageostat_0.1.1.tar.gz from release)
+[comment]: <> (2. Use R to install exageostat_0.1.1.tar.gz)
 [comment]: <> (```r)
-[comment]: <> (install.packages(repos=NULL, "exageostat_1.0.0.tar.gz"))
+[comment]: <> (install.packages(repos=NULL, "exageostat_0.1.1.tar.gz"))
 [comment]: <> (library(exageostat))
 [comment]: <> (```)
 

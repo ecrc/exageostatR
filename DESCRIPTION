@@ -6,8 +6,8 @@ SystemRequirements: GNU Make, GNU CMake, GCC Compiler Suite (C and
         (https://github.com/xianyi/OpenBLAS/releases), cblas
         (https://github.com/xianyi/OpenBLAS/releases), hwloc (>=1.11.5
         https://www.open-mpi.org), gsl (>= 2.4 https://ftp.gnu.org)
-Version: 1.0.0
-Date: 2020-08-20
+Version: 0.1.1
+Date: 2020-08-30
 Title: R Package Demonstrates the R / C Language Interface for
         Exageostat
 Author: Sameh Abdulah <sameh.abdulah@kaust.edu.sa>
@@ -22,7 +22,7 @@ Description: An R-wrapper for ExaGeoStat: a parallel high performance
 	     clusters of CPUs and GPUs.
 License: GPL (>= 2)
 URL: https://www.github.com/ecrc/exageostatr
-Packaged: 2020-08-20 04:04:27 UTC; abdullsm
+Packaged: 2020-08-30 04:04:27 UTC; abdullsm
 OS_type: unix
 RoxygenNote: 7.1.1
 NeedsCompilation: yes

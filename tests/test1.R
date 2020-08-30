@@ -1,6 +1,6 @@
  #
  #
- # Copyright (c) 2017, King Abdullah University of Science and Technology
+ # Copyright (c) 2017-2020, King Abdullah University of Science and Technology
  # All rights reserved.
  #
  # ExaGeoStat-R is a software package provided by KAUST
@@ -10,7 +10,7 @@
  # @file r_zgen_mle_test.R
  # ExaGeoStat R wrapper test example
  #
- # @version 1.0.0
+ # @version 0.1.1
  #
  # @author Sameh Abdulah
  # @date 2019-01-19

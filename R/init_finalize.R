@@ -50,8 +50,8 @@ exageostat_init <-
     pgrid <- as.integer(pgrid)
     qgrid <- as.integer(qgrid)
 
-    assert_that(ncores > 0)
-    assert_that(ngpus > 0)
+    assert_that(ncores >= 0)
+    assert_that(ngpus >= 0)
     assert_that(dts > 0)
     assert_that(lts >= 0)
     assert_that(pgrid > 0)
