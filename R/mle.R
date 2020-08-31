@@ -39,7 +39,6 @@ utils::globalVariables(c("z"))
 #' nu <- 0.5 ## Initial range.
 #' dmetric <- "euclidean" ## "euclidean" or "great_circle" distance.
 #' n <- 144 ## The number of locations (n must be a square number, n=m^2).
-#' theta_out[1:3] <- -1.99 ## Initial outputs
 #' exageostat_init(hardware = list(ncores = 2, ngpus = 0, ts = 32, pgrid = 1, qgrid = 1)) ## Initiate exageostat instance
 #' data <- simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ## Generate Z observation vector
 #' ## Estimate MLE parameters (Exact)
