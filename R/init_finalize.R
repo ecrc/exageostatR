@@ -36,12 +36,12 @@ utils::globalVariables(c("z"))
 #' exageostat_init(hardware = list(ncores = 26, ngpus = 0, ts = 320, lts = 0, pgrid = 3, qgrid = 4))
 exageostat_init <-
   function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) {
-    ncores <- hardware$ncores
-    ngpus <- hardware$ngpus
-    dts <- hardware$ts
-    lts <- hardware$lts
-    pgrid <- hardware$pgrid
-    qgrid <- hardware$qgrid
+    ncores <- ifelse(is.null(hardware$ncores), 1, hardware$ncores)
+    ngpus <- ifelse(is.null(hardware$ngpus), 0, hardware$ngpus)
+    dts <- ifelse(is.null(hardware$ts), 320, hardware$ts)
+    lts <- ifelse(is.null(hardware$lts), 0, hardware$lts)
+    pgrid <- ifelse(is.null(hardware$pgrid), 1, hardware$pgrid)
+    qgrid <- ifelse(is.null(hardware$qgrid), 1, hardware$qgrid)
 
     ncores <- as.integer(ncores)
     ngpus <- as.integer(ngpus)
