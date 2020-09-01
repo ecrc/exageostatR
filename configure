@@ -457,14 +457,14 @@ else
         mkdir -p build && cd build
         rm -rf ./CMake*
         LDFLAGS="-L$PREFIX/lib" cmake -DCMAKE_C_FLAGS=-fPIC -DCHAMELEON_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DCHAMELEON_USE_CUDA=$CUDAVALUE -DCHAMELEON_ENABLE_EXAMPLE=OFF -DCHAMELEON_ENABLE_TESTING=OFF -DCHAMELEON_ENABLE_TIMING=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$DEFINE_BLAS_LIBS_CMAKE" ..
-        $MAKE || $MAKE VERBOSE=1 || { echo 'CHAMELEON installation failed' ; exit 1; }
-        $MAKE install
+	$MAKE || $MAKE VERBOSE=1 || { echo 'CHAMELEON installation failed' ; exit 1; }
+	$MAKE install
     else
-        echo "####################"
-        echo "CHAMELEON NOT FOUND"
-        echo "Please download it from: https://gitlab.inria.fr/solverstack/chameleon.git"
-        echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-        echo ""
+	echo "####################"
+	echo "CHAMELEON NOT FOUND"
+ 	echo "Please download it from: https://gitlab.inria.fr/solverstack/chameleon.git"
+	echo "After installing it, set the proper PKG_CONFIG_PATH variable"
+	echo ""
         err=1
     fi
 fi
@@ -494,9 +494,9 @@ else
         #cd $TMPDIR/stars-h
         mkdir -p build && cd build
         rm -rf ./CMake*
-        cmake -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DOPENMP=OFF -DSTARPU=OFF  -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
-        $MAKE || $MAKE VERBOSE=1 || { echo 'STARS-H installation failed' ; exit 1; }
-        $MAKE install
+	cmake -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DOPENMP=OFF -DSTARPU=OFF  -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
+	$MAKE || $MAKE VERBOSE=1 || { echo 'STARS-H installation failed' ; exit 1; }
+	$MAKE install
     else
         echo "####################"
         echo "starsh NOT FOUND"
@@ -519,18 +519,14 @@ else
     if [ "$BUILD_DEPENDENCIES" == "true" ]
     then
         echo "Building HiCMA..."
-        #cd $BASEDIR/src/h/
-        #cp -r $BASEDIR/src/h $TMPDIR
-        # cd $TMPDIR/h
-        #git clone https://github.com/ecrc/stars-h stars-h
-        cd $TMPDIR
-        cd h
-        git checkout c8287eed9ea9a803fc88ab067426ac6baacaa534
+        cd $BASEDIR/src/h/
+        cp -r $BASEDIR/src/h $TMPDIR
+        cd $TMPDIR/h
         mkdir -p build && cd build
         rm -rf ./CMake*
         cmake -DHICMA_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DHICMA_ENABLE_TESTING=OFF -DHICMA_ENABLE_TIMING=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
-        $MAKE || $MAKE VERBOSE=1 || { echo 'HICMA installation failed' ; exit 1; }
-        $MAKE install
+	$MAKE || $MAKE VERBOSE=1 || { echo 'HICMA installation failed' ; exit 1; }
+	$MAKE install
     else
         echo "####################"
         echo "hicma NOT FOUND"
