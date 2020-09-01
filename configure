@@ -406,7 +406,6 @@ else
 				CFLAGS=-Wno-implicit-function-declaration  ./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --disable-glpk --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all
 			fi	
 		fi
-
 		$MAKE || $MAKE VERBOSE=1 || { echo 'STARPU installation failed' ; exit 1; }
 		$MAKE install
 	else
@@ -494,8 +493,6 @@ else
 		cd stars-h
 		git checkout 687c2dc6df085655959439c38a40ccbe7cb57f82
 		git submodule update --init --recursive 2>&1 >/dev/null || true
-		#cp -r $BASEDIR/src/stars-h $TMPDIR
-		#cd $TMPDIR/stars-h
 		mkdir -p build && cd build
 		rm -rf ./CMake*
 		cmake -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DOPENMP=OFF -DSTARPU=OFF  -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
