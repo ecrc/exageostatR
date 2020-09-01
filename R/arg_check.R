@@ -17,16 +17,6 @@
 
 library(assertthat)
 
-utils::globalVariables(c("ncores"))
-utils::globalVariables(c("ngpus"))
-utils::globalVariables(c("dts"))
-utils::globalVariables(c("lts"))
-utils::globalVariables(c("pgrid"))
-utils::globalVariables(c("qgrid"))
-utils::globalVariables(c("x"))
-utils::globalVariables(c("y"))
-utils::globalVariables(c("z"))
-
 arg_check_sim <- function(sigma_sq, beta, nu, dmetric) {
   assert_that(is.double(sigma_sq))
   assert_that(is.double(beta))

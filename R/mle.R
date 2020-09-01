@@ -17,16 +17,6 @@
 
 library(assertthat)
 
-utils::globalVariables(c("ncores"))
-utils::globalVariables(c("ngpus"))
-utils::globalVariables(c("dts"))
-utils::globalVariables(c("lts"))
-utils::globalVariables(c("pgrid"))
-utils::globalVariables(c("qgrid"))
-utils::globalVariables(c("x"))
-utils::globalVariables(c("y"))
-utils::globalVariables(c("z"))
-
 #' Maximum Likelihood Evaluation  using exact method
 #' @param data A list of x vector (x-dim), y vector (y-dim), and z observation vector
 #' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
@@ -60,8 +50,8 @@ exact_mle <-
     n <- as.integer(n)
     optimization$max_iters <- as.integer(optimization$max_iters)
     theta_out2 <- .C("mle_exact", data$x, n, data$y, n, data$z, n, optimization$clb, 3,
-      optimization$cub, 3, dmetric, n, optimization$tol, optimization$max_iters, ncores,
-      ngpus, dts, pgrid, qgrid,
+      optimization$cub, 3, dmetric, n, optimization$tol, optimization$max_iters, .pkgenv$ncores,
+      .pkgenv$ngpus, .pkgenv$dts, .pkgenv$pgrid, .pkgenv$qgrid,
       theta_out = double(6)
     )$theta_out
 

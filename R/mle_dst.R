@@ -17,16 +17,6 @@
 
 library(assertthat)
 
-utils::globalVariables(c("ncores"))
-utils::globalVariables(c("ngpus"))
-utils::globalVariables(c("dts"))
-utils::globalVariables(c("lts"))
-utils::globalVariables(c("pgrid"))
-utils::globalVariables(c("qgrid"))
-utils::globalVariables(c("x"))
-utils::globalVariables(c("y"))
-utils::globalVariables(c("z"))
-
 #' Maximum Likelihood Evaluation (MLE) using Diagonal Super-tile (DST) method
 #' @param data A list of x vector (x-dim), y vector (y-dim), and z observation vector
 #' @param dst_thick  A number - Diagonal Super-Tile (DST) diagonal thick
@@ -67,7 +57,7 @@ dst_mle <-
     optimization$max_iters <- as.integer(optimization$max_iters)
     theta_out2 <- .C("mle_dst", data$x, n, data$y, n, data$z, n, optimization$clb, 3,
       optimization$cub, 3, dst_thick, dmetric, n, optimization$tol, optimization$max_iters,
-      ncores, ngpus, dts, pgrid, qgrid,
+      .pkgenv$ncores, .pkgenv$ngpus, .pkgenv$dts, .pkgenv$pgrid, .pkgenv$qgrid,
       theta_out = double(6)
     )$theta_out
     print("back from mle_exact C function call. Hit key....")

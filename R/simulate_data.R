@@ -17,16 +17,6 @@
 
 library(assertthat)
 
-utils::globalVariables(c("ncores"))
-utils::globalVariables(c("ngpus"))
-utils::globalVariables(c("dts"))
-utils::globalVariables(c("lts"))
-utils::globalVariables(c("pgrid"))
-utils::globalVariables(c("qgrid"))
-utils::globalVariables(c("x"))
-utils::globalVariables(c("y"))
-utils::globalVariables(c("z"))
-
 #' Simulate Geospatial data (x, y, z)
 #' @param sigma_sq A number - variance parameter
 #' @param beta A number - smoothness parameter)
@@ -61,8 +51,8 @@ simulate_data_exact <-
     n <- as.integer(n)
     seed <- as.integer(seed)
     globalveclen <- as.integer(3 * n)
-    globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, ncores, ngpus,
-      dts, pgrid, qgrid, globalveclen,
+    globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, .pkgenv$ncores, 
+      .pkgenv$ngpus, .pkgenv$dts, .pkgenv$pgrid, .pkgenv$qgrid, globalveclen,
       globalvec = double(globalveclen)
     )$globalvec
     newList <-
