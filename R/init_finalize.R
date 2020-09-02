@@ -62,7 +62,7 @@ exageostat_init <-
 #' @examples
 #' exageostat_finalize()
 exageostat_finalize <- function() {
-  if(exists(running_instance) && running_instance == 1)
+  if(exists("running_instance") && running_instance == 1)
   {
      .C("rexageostat_finalize")
       running_instance <<- 0
