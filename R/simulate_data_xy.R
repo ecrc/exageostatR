@@ -17,16 +17,6 @@
 
 library(assertthat)
 
-utils::globalVariables(c("ncores"))
-utils::globalVariables(c("ngpus"))
-utils::globalVariables(c("dts"))
-utils::globalVariables(c("lts"))
-utils::globalVariables(c("pgrid"))
-utils::globalVariables(c("qgrid"))
-utils::globalVariables(c("x"))
-utils::globalVariables(c("y"))
-utils::globalVariables(c("z"))
-
 #' Simulate Geospatial data given (x, y) locations
 #' @param x A vector  (x-dim)
 #' @param y A vector (y-dim)
@@ -59,7 +49,7 @@ simulate_obs_exact <-
     n <- as.integer(n)
     globalveclen <- as.integer(3 * n)
     globalvec2 <- .C("gen_z_givenlocs_exact", x, n, y, n, sigma_sq, beta, nu, dmetric,
-      n, ncores, ngpus, dts, pgrid, qgrid, globalveclen,
+      n, .pkgenv$ncores, .pkgenv$ngpus, .pkgenv$dts, .pkgenv$pgrid, .pkgenv$qgrid, globalveclen,
       globalvec = double(globalveclen)
     )$globalvec
     newList <- list(

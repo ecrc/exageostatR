@@ -17,16 +17,6 @@
 
 library(assertthat)
 
-utils::globalVariables(c("ncores"))
-utils::globalVariables(c("ngpus"))
-utils::globalVariables(c("dts"))
-utils::globalVariables(c("lts"))
-utils::globalVariables(c("pgrid"))
-utils::globalVariables(c("qgrid"))
-utils::globalVariables(c("x"))
-utils::globalVariables(c("y"))
-utils::globalVariables(c("z"))
-
 #' Maximum Likelihood Evaluation  using exact method
 #' @param data A list of x vector (x-dim), y vector (y-dim), and z observation vector
 #' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
@@ -65,7 +55,6 @@ exact_mle <-
       theta_out = double(6)
     )$theta_out
 
-    print("back from mle_exact C function call. Hit key....")
     newList <-
       list(
         "sigma_sq" = theta_out2[1],
@@ -75,5 +64,6 @@ exact_mle <-
         "total_time" = theta_out2[5],
         "no_iters" = theta_out2[6]
       )
+    print("MLE function (done). Hit key....")
     return(newList)
   }

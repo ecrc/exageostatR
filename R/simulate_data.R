@@ -17,16 +17,6 @@
 
 library(assertthat)
 
-utils::globalVariables(c("ncores"))
-utils::globalVariables(c("ngpus"))
-utils::globalVariables(c("dts"))
-utils::globalVariables(c("lts"))
-utils::globalVariables(c("pgrid"))
-utils::globalVariables(c("qgrid"))
-utils::globalVariables(c("x"))
-utils::globalVariables(c("y"))
-utils::globalVariables(c("z"))
-
 #' Simulate Geospatial data (x, y, z)
 #' @param sigma_sq A number - variance parameter
 #' @param beta A number - range parameter)
@@ -61,17 +51,17 @@ simulate_data_exact <-
     n <- as.integer(n)
     seed <- as.integer(seed)
     globalveclen <- as.integer(3 * n)
-    globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, ncores, ngpus,
-      dts, pgrid, qgrid, globalveclen,
-      globalvec = double(globalveclen)
-    )$globalvec
+    globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, ncores, 
+		     ngpus, dts, pgrid, qgrid, globalveclen,
+		     globalvec = double(globalveclen)
+		     )$globalvec
     newList <-
-      list(
-        "x" = globalvec2[1:n],
-        "y" = globalvec2[(n + 1):(2 * n)],
-        "z" = globalvec2[((2 * n) + 1):(3 * n)]
-      )
+	    list(
+		 "x" = globalvec2[1:n],
+		 "y" = globalvec2[(n + 1):(2 * n)],
+		 "z" = globalvec2[((2 * n) + 1):(3 * n)]
+	    )
 
-    print("back from gen_z_exact  C function call. Hit key....")
+    print("Synthetic data have been generated ... Hit key....")
     return(newList)
   }
