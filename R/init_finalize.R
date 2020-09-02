@@ -28,7 +28,7 @@ library(assertthat)
 exageostat_init <-
   function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) {
 
-    if(exists(running_instance) && running_instance == 1)
+    if(exists("running_instance") && running_instance == 1)
     {
 	print("There is already an active instance... Hit key....")
 	return(NULL)
