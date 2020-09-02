@@ -166,7 +166,6 @@ exageostat_init(hardware = list (ncores=2, ngpus=0,
 ts=320, lts=0,  pgrid=1, qgrid=1))			      #Initiate exageostat instance.
 data            = simulate_obs_exact( x, y, sigma_sq,
  beta, nu, dmetric) 					      #Generate Z observation vector.
-#Estimate MLE parameters (Exact)
 result          = exact_mle(data, dmetric, optimization = 
 list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ), tol = 1e-4, max_iters = 20))
 exageostat_finalize()					      #Finalize exageostat instance.
