@@ -13,7 +13,7 @@
 # @version 1.0.1
 #
 # @author Sameh Abdulah
-# @date 2019-09-25
+# @date 2020-09-02
 
 library(assertthat)
 
@@ -29,8 +29,8 @@ utils::globalVariables(c("z"))
 
 #' Simulate Geospatial data (x, y, z)
 #' @param sigma_sq A number - variance parameter
-#' @param beta A number - smoothness parameter)
-#' @param nu A number  - range parameter
+#' @param beta A number - range parameter)
+#' @param nu A number  - smoothness parameter
 #' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
 #' @param n  A number -  data size
 #' @param seed  A number -  seed of random generation
@@ -38,8 +38,8 @@ utils::globalVariables(c("z"))
 #' @examples
 #' seed <- 0 ## Initial seed to generate XY locs.
 #' sigma_sq <- 1 ## Initial variance.
-#' beta <- 0.1 ## Initial smoothness.
-#' nu <- 0.5 ## Initial range.
+#' beta <- 0.1 ## Initial range.
+#' nu <- 0.5 ## Initial smoothness.
 #' dmetric <- "euclidean" ## "euclidean" or "great_circle" distance.
 #' n <- 1600 ## The number of locations (n must be a square number, n=m^2).
 #' exageostat_init(hardware = list(ncores = 2, ngpus = 0, ts = 320, pgrid = 1, qgrid = 1)) ## Initiate exageostat instance

@@ -13,7 +13,7 @@
 # @version 1.0.1
 #
 # @author Sameh Abdulah
-# @date 2019-09-25
+# @date 2020-09-02
 
 library(assertthat)
 
@@ -37,8 +37,8 @@ utils::globalVariables(c("z"))
 #' @examples
 #' seed <- 0 ## Initial seed to generate XY locs.
 #' sigma_sq <- 1 ## Initial variance.
-#' beta <- 0.03 ## Initial smoothness.
-#' nu <- 0.5 ## Initial range.
+#' beta <- 0.03 ## Initial range.
+#' nu <- 0.5 ## Initial smoothness.
 #' dmetric <- "euclidean" ## "euclidean" or "great_circle" distance.
 #' n <- 900 ## The number of locations (n must be a square number, n=m^2).
 #' tlr_acc <- 7 ## Approximation accuracy 10^-(acc)

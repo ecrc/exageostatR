@@ -13,7 +13,7 @@
 # @version 1.0.1
 #
 # @author Sameh Abdulah
-# @date 2019-09-25
+# @date 2020-09-02
 
 library(assertthat)
 
@@ -31,14 +31,14 @@ utils::globalVariables(c("z"))
 #' @param x A vector  (x-dim)
 #' @param y A vector (y-dim)
 #' @param sigma_sq A number - variance parameter
-#' @param beta A number - smoothness parameter)
-#' @param nu A number  - range parameter
+#' @param beta A number - range parameter)
+#' @param nu A number  - smoothness parameter
 #' @param dmetric  A string -  distance metric - "euclidean" or "great_circle"
 #' @return a list of of three vectors (x, y, z)
 #' @examples
 #' sigma_sq <- 1 ## Initial variance.
-#' beta <- 0.1 ## Initial smoothness.
-#' nu <- 0.5 ## Initial range.
+#' beta <- 0.1 ## Initial range.
+#' nu <- 0.5 ## Initial smoothness.
 #' dmetric <- "euclidean" ## "euclidean" or "great_circle" distance.
 #' n <- 1600 ## The number of locations (n must be a square number, n=m^2)
 #' x <- rnorm(n, 0, 1) # x measurements of n locations.
