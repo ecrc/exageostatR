@@ -393,17 +393,18 @@ else
 		cd $TMPDIR
 		wget http://starpu.gforge.inria.fr/files/starpu-1.2.9/starpu-1.2.9.tar.gz -O - | tar -zx
 		cd starpu-1.2.9
+		#CFLAGS=-Wno-implicit-function-declaration
 		if [ "$CUDAVALUE" == "ON" ]; then
 			if [ "$MPIVALUE" == "ON" ]; then
-				CFLAGS=-Wno-implicit-function-declaration ./configure --disable-starpufft --enable-cuda --disable-opencl --prefix=$PREFIX   --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --with-perf-model-dir=$TMPDIR  --disable-fstack-protector-all
+				./configure --disable-starpufft --enable-cuda --disable-opencl --prefix=$PREFIX   --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --with-perf-model-dir=$TMPDIR  --disable-fstack-protector-all --disable-gcc-extensions
 			else
-				CFLAGS=-Wno-implicit-function-declaration ./configure --disable-starpufft --enable-cuda --disable-opencl --prefix=$PREFIX   --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all
+				./configure --disable-starpufft --enable-cuda --disable-opencl --prefix=$PREFIX   --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all --disable-gcc-extensions
 			fi
 		else
 			if [ "$MPIVALUE" == "ON" ]; then
-				CFLAGS=-Wno-implicit-function-declaration ./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX  --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples  --disable-fortran --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all
+				./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX  --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples  --disable-fortran --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all --disable-gcc-extensions
 			else
-				CFLAGS=-Wno-implicit-function-declaration  ./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --disable-glpk --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all
+				./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --disable-glpk --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all --disable-gcc-extensions
 			fi	
 		fi
 		$MAKE || $MAKE VERBOSE=1 || { echo 'STARPU installation failed' ; exit 1; }
