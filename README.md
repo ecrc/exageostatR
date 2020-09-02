@@ -1,7 +1,23 @@
 ExaGeoStatR
-============
+===========
 
-`ExaGeoStatR` is an R-Wrapper for [ExaGeoStat framework]((http://www.github.com/ecrc/exageostat), a parallel high performance unified framework for geostatistics on manycore systems.
+`ExaGeoStatR` is an R-Wrapper for [ExaGeoStat framework]((http://www.github.com/ecrc/exageostat), a parallel high performance unified software for geostatistics on manycore systems.
+
+
+ExaGeoStatR v1.0.1
+==================
+1-Major changes on the structure of the package to meet CRAN requirements and to facilitate the installation on different platforms. 
+
+
+Pervious Versions
+=================
+### ExaGeoStatR v0.1.0
+
+1- Large-scale synthetic Geostatistics data generator.
+2- Support exact computation of the Maximum Likelihood Estimation (MLE) function using shared-memory, GPUS, or distributed-memory systems
+
+### ExaGeoStatR v1.0.0
+1-Support approximate computation (i.e., Diagonal Super-Tile (DST) and Tile Low-Rank (TLR)  of the Maximum Likelihood Estimation (MLE) function using shared-memory, GPUS, or distributed-memory systems.
 
 Getting Started
 ===============
@@ -9,6 +25,7 @@ Getting Started
 ### Installation
 
 #### Software dependencies
+1. BLAS/CBLAS/LAPACK/LAPACKE optimized implementation, ex.,  AMD Core Math Library (ACML), Arm Performance Libraries, ATLAS, Intel Math Kernel Library (MKL), or OpenBLAS.
 1. [Portable Hardware Locality (hwloc)](https://www.open-mpi.org/projects/hwloc/).
 2. [NLopt](https://nlopt.readthedocs.io/en/latest/).
 3. [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/doc/html/index.html).
@@ -16,6 +33,8 @@ Getting Started
 5. [Chameleon](https://project.inria.fr/chameleon/).
 6. [Hicma](https://github.com/ecrc/hicma/).
 7. [Stars-H](https://github.com/ecrc/stars-h/).
+
+All these dependencies are automatically installed with the package if not exists (OpenBLAS is a default) on the system (ExaGeoStatR v1.0.1).
 
 
 #### Install latest ExaGeoStatR version hosted on GitHub(parallel installation)
@@ -50,10 +69,10 @@ install_git(url="https://github.com/ecrc/exageostatR", configure.args=C('--enabl
 ```
 
 [comment]: <> (#### Get the latest ExaGeoStatR release  hosted on GitHub)
-[comment]: <> (1. Download exageostat_0.1.1.tar.gz from release)
-[comment]: <> (2. Use R to install exageostat_0.1.1.tar.gz)
+[comment]: <> (1. Download exageostat_1.0.1.tar.gz from release)
+[comment]: <> (2. Use R to install exageostat_1.0.1.tar.gz)
 [comment]: <> (```r)
-[comment]: <> (install.packages(repos=NULL, "exageostat_0.1.1.tar.gz"))
+[comment]: <> (install.packages(repos=NULL, "exageostat_1.0.1.tar.gz"))
 [comment]: <> (library(exageostat))
 [comment]: <> (```)
 
@@ -65,7 +84,7 @@ Operations:
 1. Generate synthetic spatial datasets (i.e., locations & environmental measurements).
 2. Maximum likelihood evaluation using dense matrices.
 3. Maximum likelihood evaluation using compressed matrices based on Tile Low-Rank(TLR).
-4. Maximum likelihood evaluation using  matrices based on Diagonal Super-Tile(DST).
+4. Maximum likelihood evaluation using matrices based on Diagonal Super-Tile(DST).
 
 More information
 ================
