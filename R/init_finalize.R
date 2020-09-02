@@ -17,7 +17,12 @@
 
 library(assertthat)
 
-.pkgenv <- new.env()
+ncores <- 1 
+ngpus <- 0
+dts <- 320
+lts <- 0 
+pgrid <- 1
+qgrid <- 1
 
 #' Initial an instance of ExaGeoStatR
 #' @param hardware A list of ncores, ngpus, tile size, pgrid, and qgrid
@@ -34,13 +39,6 @@ exageostat_init <-
     lts <- ifelse(is.null(hardware$lts), 0, hardware$lts)
     pgrid <- ifelse(is.null(hardware$pgrid), 1, hardware$pgrid)
     qgrid <- ifelse(is.null(hardware$qgrid), 1, hardware$qgrid)
-
-    .pkgenv$ncores <- as.integer(ncores)
-    .pkgenv$ngpus <- as.integer(ngpus)
-    .pkgenv$dts <- as.integer(dts)
-    .pkgenv$lts <- as.integer(lts)
-    .pkgenv$pgrid <- as.integer(pgrid)
-    .pkgenv$qgrid <- as.integer(qgrid)
 
     assert_that(.pkgenv$ncores >= 0)
     assert_that(.pkgenv$ngpus >= 0)

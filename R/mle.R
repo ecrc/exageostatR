@@ -50,8 +50,8 @@ exact_mle <-
     n <- as.integer(n)
     optimization$max_iters <- as.integer(optimization$max_iters)
     theta_out2 <- .C("mle_exact", data$x, n, data$y, n, data$z, n, optimization$clb, 3,
-      optimization$cub, 3, dmetric, n, optimization$tol, optimization$max_iters, .pkgenv$ncores,
-      .pkgenv$ngpus, .pkgenv$dts, .pkgenv$pgrid, .pkgenv$qgrid,
+      optimization$cub, 3, dmetric, n, optimization$tol, optimization$max_iters, ncores,
+      ngpus, dts, pgrid, qgrid,
       theta_out = double(6)
     )$theta_out
 
