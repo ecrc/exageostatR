@@ -28,7 +28,7 @@ library(assertthat)
 exageostat_init <-
   function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) {
 
-    if(exists("running_instance") && running_instance == 1)
+    if(exists("active_instance") && active_instance == 1)
     {
 	print("There is already an active instance... Hit key....")
 	return(NULL)
@@ -40,7 +40,7 @@ exageostat_init <-
     lts <<- ifelse(is.null(hardware$lts), 0, hardware$lts)
     pgrid <<- ifelse(is.null(hardware$pgrid), 1, hardware$pgrid)
     qgrid <<- ifelse(is.null(hardware$qgrid), 1, hardware$qgrid)
-    running_instance <<- 1
+    active_instance <<- 1
 
     assert_that(ncores >= 0)
     assert_that(ngpus >= 0)
@@ -62,10 +62,10 @@ exageostat_init <-
 #' @examples
 #' exageostat_finalize()
 exageostat_finalize <- function() {
-  if(exists("running_instance") && running_instance == 1)
+  if(exists("active_instance") && active_instance == 1)
   {
      .C("rexageostat_finalize")
-      running_instance <<- 0
+      active_instance <<- 0
      print("ExaGeoStatR instance closed... Hit key....")
   }
   else
