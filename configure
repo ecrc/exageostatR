@@ -47,7 +47,7 @@ cpucores=`getconf _NPROCESSORS_ONLN`
 #VARIABLES
 MAKE=${MAKE:-make -j $(cpucores) -l $((cpucores + 1))}
 BASEDIR=$(pwd)
-#TMPDIR=$BASEDIR/_$$
+TMPDIR=$BASEDIR/_$$
 #export STARPU_HOME=~/trash"
 #TMPDIR="/tmp/exageostatr"
 BUILD_DEPENDENCIES='true'
