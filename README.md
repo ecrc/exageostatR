@@ -142,14 +142,14 @@ beta            = 0.03                                        #Initial range.
 nu              = 0.5                                         #Initial smoothness.
 dmetric         = "euclide"                                   #"euclidean", or "great_circle".
 n               = 900                                         #n*n locations grid.
-dst_thick       = 3                                           #Number of used Diagonal Super Tile (DST).
+dst_band       = 3                                            #Number of diagonal double tiles.
 exageostat_init(hardware = list (ncores=4, ngpus=0,
 ts=320, lts=0,  pgrid=1, qgrid=1))			      #Initiate exageostat instance.
 data      	= simulate_data_exact(sigma_sq, beta, nu,
 dmetric, n, seed) 					      #Generate Z observation vector.
-result       	= dst_mle(data, dst_thick, dmetric, optimization = 
+result       	= dst_mle(data, dst_band, dmetric, optimization = 
 list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5,5 ),
- tol = 1e-4, max_iters = 20))				      #Estimate MLE parameters (DST approximation).
+ tol = 1e-4, max_iters = 20))				      #Estimate MLE parameters (DST).
 exageostat_finalize()					      #Finalize exageostat instance.
 ```
 4. Test Generating Z vector using given (x, y) locations with exact MLE computation.
