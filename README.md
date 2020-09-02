@@ -104,7 +104,6 @@ dmetric      = "euclidean"                                    #"euclidean", or "
 n             = 1600                                          #n*n locations grid.
 exageostat_init(hardware = list (ncores=2, ngpus=0, 
 ts=320, pgrid=1, qgrid=1))				      #Initiate exageostat instance.
-#Generate Z observation vector
 data          = simulate_data_exact(sigma_sq, beta, nu,
 dmetric, n, seed) 					      #Generate Z observation vector.
 result        = exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001),
@@ -124,10 +123,8 @@ n               = 900                                         #n*n locations gri
 tlr_acc         = 7                                           #TLR accuracy 10^-(acc).
 tlr_maxrank     = 450                                         #TLR Max Rank.
 
-#Initiate exageostat instance
 exageostat_init(hardware = list (ncores=2, ngpus=0, 
 ts=320, lts=600,  pgrid=1, qgrid=1))			      #Initiate exageostat instance.
-#Generate Z observation vector
 data         	= simulate_data_exact(sigma_sq, beta, nu,
 dmetric, n, seed) 					      #Generate Z observation vector.
 result       	= tlr_mle(data, tlr_acc, tlr_maxrank,  dmetric, optimization = 
