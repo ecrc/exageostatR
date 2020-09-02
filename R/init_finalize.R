@@ -27,12 +27,20 @@ library(assertthat)
 #' exageostat_init(hardware = list(ncores = 26, ngpus = 0, ts = 320, lts = 0, pgrid = 3, qgrid = 4))
 exageostat_init <-
   function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) {
+
+    if(exists(running_instance) && running_instance == 1)
+    {
+	print("There is already an active instance... Hit key....")
+	return(NULL)
+    }
+
     ncores <<- ifelse(is.null(hardware$ncores), 1, hardware$ncores)
     ngpus <<- ifelse(is.null(hardware$ngpus), 0, hardware$ngpus)
     dts <<- ifelse(is.null(hardware$ts), 320, hardware$ts)
     lts <<- ifelse(is.null(hardware$lts), 0, hardware$lts)
     pgrid <<- ifelse(is.null(hardware$pgrid), 1, hardware$pgrid)
     qgrid <<- ifelse(is.null(hardware$qgrid), 1, hardware$qgrid)
+    running_instance <<- 1
 
     assert_that(ncores >= 0)
     assert_that(ngpus >= 0)
@@ -46,7 +54,7 @@ exageostat_init <-
     Sys.setenv(STARPU_SILENT = 1)
     Sys.setenv(KMP_AFFINITY = "disabled")
     .C("rexageostat_init", ncores, ngpus, dts)
-    print("back from exageostat_init C function call. Hit key....")
+    print("An ExaGeoStatR instance is active now... Hit key....")
   }
 
 #' Finalize the current instance of ExaGeoStatR
@@ -54,6 +62,11 @@ exageostat_init <-
 #' @examples
 #' exageostat_finalize()
 exageostat_finalize <- function() {
-  .C("rexageostat_finalize")
-  print("back from exageostat_finalize C function call. Hit key....")
+  if(exists(running_instance) && running_instance == 1)
+  {
+     .C("rexageostat_finalize")
+     print("ExaGeoStatR instance closed... Hit key....")
+  }
+  else
+     print("No active instances... Hit key....")
 }

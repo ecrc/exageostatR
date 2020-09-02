@@ -62,6 +62,6 @@ simulate_data_exact <-
 		 "z" = globalvec2[((2 * n) + 1):(3 * n)]
 	    )
 
-    print("back from gen_z_exact  C function call. Hit key....")
+    print("Synthetic data have been generated ... Hit key....")
     return(newList)
   }

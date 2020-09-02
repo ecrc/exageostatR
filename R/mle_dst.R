@@ -60,7 +60,6 @@ dst_mle <-
       ncores, ngpus, dts, pgrid, qgrid,
       theta_out = double(6)
     )$theta_out
-    print("back from mle_exact C function call. Hit key....")
     newList <-
       list(
         "sigma_sq" = theta_out2[1],
@@ -70,5 +69,6 @@ dst_mle <-
         "total_time" = theta_out2[5],
         "no_iters" = theta_out2[6]
       )
+    print("MLE function (done). Hit key....")
     return(newList)
   }
