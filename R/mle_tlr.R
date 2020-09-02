@@ -63,8 +63,8 @@ tlr_mle <-
     optimization$max_iters <- as.integer(optimization$max_iters)
     theta_out2 <- .C("mle_tlr", data$x, n, data$y, n, data$z, n, optimization$clb, 3,
       optimization$cub, 3, tlr_acc, tlr_maxrank, dmetric, n, optimization$tol,
-      optimization$max_iters, .pkgenv$ncores, .pkgenv$ngpus, .pkgenv$lts, .pkgenv$pgrid, 
-      .pkgenv$qgrid, theta_out = double(6))$theta_out
+      optimization$max_iters, ncores, ngpus, lts, pgrid, 
+      qgrid, theta_out = double(6))$theta_out
     print("back from mle_exact C function call. Hit key....")
     newList <-
       list(

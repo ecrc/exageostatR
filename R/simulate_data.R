@@ -52,7 +52,7 @@ simulate_data_exact <-
     seed <- as.integer(seed)
     globalveclen <- as.integer(3 * n)
     globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, ncores, 
-		     .pkgenv$ngpus, dts, pgrid, qgrid, globalveclen,
+		     ngpus, dts, pgrid, qgrid, globalveclen,
 		     globalvec = double(globalveclen)
 		     )$globalvec
     newList <-
