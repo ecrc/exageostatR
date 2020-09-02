@@ -9,7 +9,7 @@ ExaGeoStatR v1.0.1
 1-Major changes on the structure of the package to meet CRAN requirements and to facilitate the installation on different platforms. 
 
 
-Pervious Versions
+Previous Versions
 =================
 ### ExaGeoStatR v0.1.0
 
@@ -31,13 +31,13 @@ Getting Started
 3. [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/doc/html/index.html).
 4. [StarPU](http://starpu.gforge.inria.fr/).
 5. [Chameleon](https://project.inria.fr/chameleon/).
-6. [Hicma](https://github.com/ecrc/hicma/).
-7. [Stars-H](https://github.com/ecrc/stars-h/).
+6. [HiCMA](https://github.com/ecrc/hicma/).
+7. [STARS-H](https://github.com/ecrc/stars-h/).
 
 All these dependencies are automatically installed with the package if not exist (OpenBLAS is the default BLAS library) on the system (ExaGeoStatR v1.0.1).
 
 
-#### Install latest ExaGeoStatR version hosted on GitHub(parallel installation)
+#### Install latest ExaGeoStatR version hosted on GitHub (parallel installation)
 ```r
 library("devtools")
 Sys.setenv(MKLROOT="/opt/intel/mkl")
@@ -98,10 +98,9 @@ R Examples
 library("exageostatr")                                        #Load ExaGeoStatR lib.
 seed          = 0                                             #Initial seed to generate XY locs.
 sigma_sq      = 1                                             #Initial variance.
-beta          = 0.1                                           #Initial smoothness.
-nu            = 0.5                                           #Initial range.
-dmetric       = 0                                             #0 --> Euclidean distance, 
-                                                              #1--> great circle distance.
+beta          = 0.1                                           #Initial range.
+nu            = 0.5                                           #Initial smoothness.
+dmetric      = "euclidean"                                    #"euclidean", or "great_circle",
 n             = 1600                                          #n*n locations grid.
 #theta_out[1:3]                  = -1.99
 exageostat_init(hardware = list (ncores=2, ngpus=0, 
@@ -123,10 +122,9 @@ exageostat_finalize()
 library("exageostatr")                                          #Load ExaGeoStatR lib.
 seed            = 0                                             #Initial seed to generate XY locs.
 sigma_sq        = 1                                             #Initial variance.
-beta            = 0.03                                          #Initial smoothness.
-nu              = 0.5                                           #Initial range.
-dmetric         = 0                                             #0 --> Euclidean distance, 
-                                                                #1--> great circle distance.
+beta            = 0.03                                          #Initial range.
+nu              = 0.5                                           #Initial smoothness.
+dmetric         = "euclidean"                                   #"euclidean", or "great_circle",
 n               = 900                                           #n*n locations grid.
 tlr_acc         = 7                                             #Approximation accuracy 10^-(acc)
 tlr_maxrank     = 450                                           #Max Rank
@@ -150,10 +148,9 @@ exageostat_finalize()
 library("exageostatr")                                          #Load ExaGeoStatR lib.
 seed            = 0                                             #Initial seed to generate XY locs.
 sigma_sq        = 1                                             #Initial variance.
-beta            = 0.03                                          #Initial smoothness.
-nu              = 0.5                                           #Initial range.
-dmetric         = 0                                             #0 --> Euclidean distance, 
-                                                                #1--> great circle distance.
+beta            = 0.03                                          #Initial range.
+nu              = 0.5                                           #Initial smoothness.
+dmetric         = "euclidean"                                   #"euclidean", or "great_circle",
 n               = 900                                           #n*n locations grid.
 dst_thick       = 3                                             #Number of used Diagonal Super Tile (DST).
 #Initiate exageostat instance
@@ -173,10 +170,9 @@ exageostat_finalize()
 ```r
 library("exageostatr")                                                  #Load ExaGeoStatR lib.
 sigma_sq        = 1                                                     #Initial variance.
-beta            = 0.1                                                   #Initial smoothness.
-nu              = 0.5                                                   #Initial range.
-dmetric         = 0                                                     #0 --> Euclidean distance, 
-                                                                        #1--> great circle distance.
+beta            = 0.1                                                   #Initial range.
+nu              = 0.5                                                   #Initial smoothness.
+dmetric         = "euclidean"                                           #"euclidean", or "great_circle", 
 n               = 1600                                                  #n*n locations grid.
 x               = rnorm(n = 1600, mean = 39.74, sd = 25.09)     #x measurements of n locations.
 y               = rnorm(n = 1600, mean = 80.45, sd = 100.19)    #y measurements of n locations.

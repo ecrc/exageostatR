@@ -35,8 +35,8 @@ utils::globalVariables(c("z"))
 #' @examples
 #' seed <- 0 ## Initial seed to generate XY locs.
 #' sigma_sq <- 1 ## Initial variance.
-#' beta <- 0.1 ## Initial smoothness.
-#' nu <- 0.5 ## Initial range.
+#' beta <- 0.1 ## Initial range.
+#' nu <- 0.5 ## Initial smoothness.
 #' dmetric <- "euclidean" ## "euclidean" or "great_circle" distance.
 #' n <- 144 ## The number of locations (n must be a square number, n=m^2).
 #' exageostat_init(hardware = list(ncores = 2, ngpus = 0, ts = 32, pgrid = 1, qgrid = 1)) ## Initiate exageostat instance
