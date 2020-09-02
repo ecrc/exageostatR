@@ -34,7 +34,7 @@ Getting Started
 6. [Hicma](https://github.com/ecrc/hicma/).
 7. [Stars-H](https://github.com/ecrc/stars-h/).
 
-All these dependencies are automatically installed with the package if not exists (OpenBLAS is a default) on the system (ExaGeoStatR v1.0.1).
+All these dependencies are automatically installed with the package if not exist (OpenBLAS is the default BLAS library) on the system (ExaGeoStatR v1.0.1).
 
 
 #### Install latest ExaGeoStatR version hosted on GitHub(parallel installation)
