@@ -58,17 +58,17 @@ simulate_data_exact <-
     print(.pkgenv$pgrid)
     print(.pkgenv$qgrid)
 
-    globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, .pkgenv$ncores, 
-		     .pkgenv$ngpus, .pkgenv$dts, .pkgenv$pgrid, .pkgenv$qgrid, globalveclen,
-		     globalvec = double(globalveclen)
-		     )$globalvec
-    newList <-
-	    list(
-		 "x" = globalvec2[1:n],
-		 "y" = globalvec2[(n + 1):(2 * n)],
-		 "z" = globalvec2[((2 * n) + 1):(3 * n)]
-	    )
+    #globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, .pkgenv$ncores, 
+#		     .pkgenv$ngpus, .pkgenv$dts, .pkgenv$pgrid, .pkgenv$qgrid, globalveclen,
+#		     globalvec = double(globalveclen)
+#		     )$globalvec
+ #   newList <-
+#	    list(
+#		 "x" = globalvec2[1:n],
+#		 "y" = globalvec2[(n + 1):(2 * n)],
+#		 "z" = globalvec2[((2 * n) + 1):(3 * n)]
+#	    )
 
     print("back from gen_z_exact  C function call. Hit key....")
-    return(newList)
+#    return(newList)
   }
