@@ -65,6 +65,7 @@ exageostat_finalize <- function() {
   if(exists(running_instance) && running_instance == 1)
   {
      .C("rexageostat_finalize")
+      running_instance <<- 0
      print("ExaGeoStatR instance closed... Hit key....")
   }
   else
