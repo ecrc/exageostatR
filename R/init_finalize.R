@@ -41,12 +41,12 @@ exageostat_init <-
     qgrid <<- hardware$qgrid
     active_instance <<- 1
 
-    assert_that(ncores >= 0)
-    assert_that(ngpus >= 0)
-    assert_that(dts > 0)
-    assert_that(lts >= 0)
-    assert_that(pgrid > 0)
-    assert_that(qgrid > 0)
+    #assert_that(ncores >= 0)
+    #assert_that(ngpus >= 0)
+    #assert_that(dts > 0)
+    #assert_that(lts >= 0)
+    #assert_that(pgrid > 0)
+    #assert_that(qgrid > 0)
 
     Sys.setenv(OMP_NUM_THREADS = 1)
     Sys.setenv(STARPU_CALIBRATE = 1)
