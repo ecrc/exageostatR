@@ -34,12 +34,12 @@ exageostat_init <-
 	return(NULL)
     }
 
-    ncores <<- ifelse(is.null(hardware$ncores), 1, hardware$ncores)
-    ngpus <<- ifelse(is.null(hardware$ngpus), 0, hardware$ngpus)
-    dts <<- ifelse(is.null(hardware$ts), 320, hardware$ts)
-    lts <<- ifelse(is.null(hardware$lts), 0, hardware$lts)
-    pgrid <<- ifelse(is.null(hardware$pgrid), 1, hardware$pgrid)
-    qgrid <<- ifelse(is.null(hardware$qgrid), 1, hardware$qgrid)
+    ncores <<- hardware$ncores
+    ngpus <<- hardware$ngpus
+    dts <<- hardware$ts
+    lts <<- hardware$lts
+    pgrid <<- hardware$pgrid
+    qgrid <<- hardware$qgrid
     active_instance <<- 1
 
     assert_that(ncores >= 0)
