@@ -27,38 +27,43 @@ library(assertthat)
 #' exageostat_init(hardware = list(ncores = 26, ngpus = 0, ts = 320, lts = 0, pgrid = 3, qgrid = 4))
 exageostat_init <-
   function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) {
+	  
+    if(exists("active_instance") && active_instance == 1)
+    {
+        print("There is already an active instance... Hit key....")
+        return
+    }
     ncores <<- hardware$ncores
     ngpus <<- hardware$ngpus
     dts <<- hardware$ts
     lts <<- hardware$lts
     pgrid <<- hardware$pgrid
     qgrid <<- hardware$qgrid
-    #library(parallel)
-    #        library(foreach)
-    #        library(doParallel)
-    #       machineVec <- c(rep("nid00816",4), rep("nid00817",4), rep("nid00818",4), rep("nid00819",4))
-    #       c1<<-makeCluster(machineVec, port=22222)
-    #        registerDoParallel(c1)
-    #        getDoParWorkers()
-    #       x = detectCores()
-    #       print(x)
+    active_instance <<- 1
     Sys.setenv(OMP_NUM_THREADS = 1)
-    #Sys.setenv(STARPU_WORKERS_NOBIND = 1)
     Sys.setenv(STARPU_CALIBRATE = 1)
-    #Sys.setenv(STARPU_SCHED = "eager")
     Sys.setenv(STARPU_SILENT = 1) 
     Sys.setenv(KMP_AFFINITY = "disabled")   
-    #mcaffinity(1:hardware$ncores)
     
     .C("rexageostat_init",
        as.integer(ncores),
        as.integer(ngpus),
        as.integer(dts))
-    print("back from exageostat_init C function call. Hit key....")
+    print("ExaGeoStatR instance is active now.")
   }
 
+#' Finalize the current instance of ExaGeoStatR
+#' @return N/A
+#' @examples
+#' exageostat_finalize()
 exageostat_finalize <- function()
 {
-  .C("rexageostat_finalize")
-  print("back from exageostat_finalize C function call. Hit key....")
+  if(exists("active_instance") && active_instance == 1)
+  {
+     .C("rexageostat_finalize")
+      active_instance <<- 0
+     print("ExaGeoStatR instance deactiviated.")
+  }
+  else
+     print("No active instances.")
 }
