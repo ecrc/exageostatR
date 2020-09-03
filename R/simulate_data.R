@@ -36,23 +36,24 @@ library(assertthat)
 #' data <- simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ## Generate Z observation vector
 #' data
 #' exageostat_finalize() ## Finalize exageostat instance
- simulate_obs_exact <-
-  function(x, y, sigma_sq, beta, nu, dmetric = 0)
+simulate_data_exact <-
+  function(sigma_sq,
+           beta,
+           nu,
+           dmetric = 0,
+           n,
+           seed = 0)
   {
-    n = length(x)
     globalveclen = 3 * n
     globalvec  = vector (mode = "double", length = globalveclen)
     globalvec2 = .C(
-      "gen_z_givenlocs_exact",
-      as.double(x),
-      as.integer((n)),
-      as.double(y),
-      as.integer((n)),
+      "gen_z_exact",
       as.double(sigma_sq),
       as.double(beta),
       as.double(nu),
       as.integer(dmetric),
       as.integer(n),
+      as.integer(seed),
       as.integer(ncores),
       as.integer(ngpus),
       as.integer(dts),
@@ -61,13 +62,14 @@ library(assertthat)
       as.integer(globalveclen),
       globalvec = double(globalveclen)
     )$globalvec
-    #globalvec[1:globalveclen] <- globalvec2[1:globalveclen]
-    print(n)
-    print(globalveclen)
 
-    newList <- list("x" = x[1:n],
-                    "y" = y[1:n],
-                    "z" = globalvec2[1:n])
-    print("back from gen_z_givenlocs_exact  C function call. Hit key....")
+    #               globalvec[1:globalveclen] <- globalvec2[1:globalveclen]
+
+    newList <-
+      list("x" = globalvec2[1:n],
+           "y" = globalvec2[(n + 1):(2 * n)],
+           "z" = globalvec2[((2 * n) + 1):(3 * n)])
+
+    print("back from gen_z_exact  C function call. Hit key....")
     return(newList)
   }
