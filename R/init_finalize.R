@@ -30,15 +30,15 @@ exageostat_init <-
 	  
     if(exists("active_instance") && active_instance == 1)
     {
-        print("There is already an active instance... Hit key....")
+        print("There is already an active instance.")
         return(NULL)
     }
-    ncores <<- hardware$ncores
-    ngpus <<- hardware$ngpus
-    dts <<- hardware$ts
-    lts <<- hardware$lts
-    pgrid <<- hardware$pgrid
-    qgrid <<- hardware$qgrid
+    ncores <<- ifelse(is.null(hardware$ncores), 1, hardware$ncores)
+    ngpus <<- ifelse(is.null(hardware$ngpus), 0, hardware$ngpus)
+    dts <<- ifelse(is.null(hardware$ts), 320, hardware$ts)
+    lts <<- ifelse(is.null(hardware$lts), 0, hardware$lts)
+    pgrid <<- ifelse(is.null(hardware$pgrid), 1, hardware$pgrid)
+    qgrid <<- ifelse(is.null(hardware$qgrid), 1, hardware$qgrid)
     active_instance <<- 1
 
     assert_that(ncores >= 0)
