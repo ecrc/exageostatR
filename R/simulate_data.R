@@ -40,10 +40,15 @@ simulate_data_exact <-
   function(sigma_sq,
            beta,
            nu,
-           dmetric = 0,
+	   dmetric = c("euclidean", "great_circle"),
            n,
-           seed = 0)
-  {
+           seed = 0){
+	  
+	  dmetric <- arg_check_sim(sigma_sq, beta, nu, dmetric)
+	  assert_that(length(n) == 1)
+	  assert_that(n >= 1)
+	  assert_that(length(seed) == 1)
+
     globalveclen = 3 * n
     globalvec  = vector (mode = "double", length = globalveclen)
     globalvec2 = .C(
