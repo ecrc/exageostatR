@@ -70,4 +70,4 @@ library(assertthat)
                     "z" = globalvec2[1:n])
     print("back from gen_z_givenlocs_exact  C function call. Hit key....")
     return(newList)
-  }}
+  }
