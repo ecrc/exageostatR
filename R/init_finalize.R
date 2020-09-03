@@ -31,7 +31,7 @@ exageostat_init <-
     if(exists("active_instance") && active_instance == 1)
     {
         print("There is already an active instance... Hit key....")
-        return(null)
+        return(NULL)
     }
     ncores <<- hardware$ncores
     ngpus <<- hardware$ngpus
