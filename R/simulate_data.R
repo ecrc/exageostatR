@@ -48,33 +48,30 @@ simulate_data_exact <-
 	  assert_that(length(n) == 1)
 	  assert_that(n >= 1)
 	  assert_that(length(seed) == 1)
-
-    globalveclen = 3 * n
-    globalvec  = vector (mode = "double", length = globalveclen)
-    globalvec2 = .C(
-      "gen_z_exact",
-      as.double(sigma_sq),
-      as.double(beta),
-      as.double(nu),
-      as.integer(dmetric),
-      as.integer(n),
-      as.integer(seed),
-      as.integer(ncores),
-      as.integer(ngpus),
-      as.integer(dts),
-      as.integer(pgrid),
-      as.integer(qgrid),
-      as.integer(globalveclen),
-      globalvec = double(globalveclen)
-    )$globalvec
-
-    #               globalvec[1:globalveclen] <- globalvec2[1:globalveclen]
-
+	  
+	  globalveclen = 3 * n
+	  globalvec  = vector (mode = "double", length = globalveclen)
+	  
+	  globalvec2 = .C(
+			  "gen_z_exact",
+			  as.double(sigma_sq),
+			  as.double(beta),
+			  as.double(nu),
+			  as.integer(dmetric),
+			  as.integer(n),
+			  as.integer(seed),
+			  as.integer(ncores),
+			  as.integer(ngpus),
+			  as.integer(dts),
+			  as.integer(pgrid),
+			  as.integer(qgrid),
+			  as.integer(globalveclen),
+			  globalvec = double(globalveclen)
+			  )$globalvec
     newList <-
       list("x" = globalvec2[1:n],
            "y" = globalvec2[(n + 1):(2 * n)],
            "z" = globalvec2[((2 * n) + 1):(3 * n)])
-
-    print("back from gen_z_exact  C function call. Hit key....")
+       print("Synthetic data have been generated.")
     return(newList)
   }

@@ -37,49 +37,51 @@ library(assertthat)
 #' exageostat_finalize() ## Finalize exageostat instance
 
 exact_mle <-
-  function(data = list (x, y, z),
-           dmetric = 0,
-           optimization = list(
-             clb = c(0.001, 0.001, 0.001),
-             cub = c(5, 5, 5),
-             tol = 1e-4,
-             max_iters = 100
-           ))
-  {
-    n = length(data$x)
-    theta_out2 = .C(
-      "mle_exact",
-      as.double(data$x),
-      as.integer((n)),
-      as.double(data$y),
-      as.integer((n)),
-      as.double(data$z),
-      as.integer((n)) ,
-      as.double(optimization$clb),
-      as.integer((3)),
-      as.double(optimization$cub),
-      as.integer((3)),
-      as.integer(dmetric),
-      as.integer(n),
-      as.double(optimization$tol),
-      as.integer(optimization$max_iters),
-      as.integer(ncores),
-      as.integer(ngpus),
-      as.integer(dts),
-      as.integer(pgrid),
-      as.integer(qgrid),
-      theta_out = double(6)
-    )$theta_out
-    #theta_out[1:6] <- theta_out2[1:6]
-    print("back from mle_exact C function call. Hit key....")
-    newList <-
-      list(
-        "sigma_sq" = theta_out2[1],
-        "beta" = theta_out2[2],
-        "nu" = theta_out2[3],
-        "time_per_iter" = theta_out2[4],
-        "total_time" = theta_out2[5],
-        "no_iters" = theta_out2[6]
-      )
-    return(newList)
-  }
+	function(data = list (x, y, z),
+		 dmetric = 0,
+		 optimization = list(
+				     clb = c(0.001, 0.001, 0.001),
+				     cub = c(5, 5, 5),
+				     tol = 1e-4,
+				     max_iters = 100
+				     )) {
+		dmetric <- arg_check_mle(data, dmetric, optimization)
+		n = length(data$x)
+		theta_out2 = .C(
+				"mle_exact",
+				as.double(data$x),
+				as.integer((n)),
+				as.double(data$y),
+				as.integer((n)),
+				as.double(data$z),
+				as.integer((n)) ,
+				as.double(optimization$clb),
+				as.integer((3)),
+				as.double(optimization$cub),
+				as.integer((3)),
+				as.integer(dmetric),
+				as.integer(n),
+				as.double(optimization$tol),
+				as.integer(optimization$max_iters),
+				as.integer(ncores),
+				as.integer(ngpus),
+				as.integer(dts),
+				as.integer(pgrid),
+				as.integer(qgrid),
+				theta_out = double(6)
+				)$theta_out
+
+		print("back from mle_exact.")
+		newList <-
+
+			list(
+
+			     "sigma_sq" = theta_out2[1],
+			     "beta" = theta_out2[2],
+			     "nu" = theta_out2[3],
+			     "time_per_iter" = theta_out2[4],
+			     "total_time" = theta_out2[5],
+			     "no_iters" = theta_out2[6]
+			)
+		return(newList)
+	}
