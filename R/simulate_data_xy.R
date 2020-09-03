@@ -38,25 +38,38 @@ library(assertthat)
 #' data
 #' exageostat_finalize() ## Finalize exageostat instance
 simulate_obs_exact <-
-  function(x, y, sigma_sq, beta, nu,
-           dmetric = c("euclidean", "great_circle")) {
-    dmetric <- arg_check_sim(sigma_sq, beta, nu, dmetric)
-    assert_that(is.double(x))
-    assert_that(is.double(y))
-    assert_that(length(x) == length(y))
-    n <- length(x)
-    dmetric <- as.integer(dmetric)
-    n <- as.integer(n)
-    globalveclen <- as.integer(3 * n)
-    globalvec2 <- .C("gen_z_givenlocs_exact", x, n, y, n, sigma_sq, beta, nu, dmetric,
-      n, .pkgenv$ncores, .pkgenv$ngpus, .pkgenv$dts, .pkgenv$pgrid, .pkgenv$qgrid, globalveclen,
-      globalvec = double(globalveclen)
-    )$globalvec
-    newList <- list(
-      "x" = x[1:n],
-      "y" = y[1:n],
-      "z" = globalvec2[1:n]
-    )
-    print("back from gen_z_givenlocs_exact  C function call. Hit key....")
-    return(newList)
-  }
+	function(x, y, sigma_sq, beta, nu,
+		 dmetric = c("euclidean", "great_circle")) {
+		dmetric <- arg_check_sim(sigma_sq, beta, nu, dmetric)
+		assert_that(is.double(x))
+		assert_that(is.double(y))
+		assert_that(length(x) == length(y))
+		n <- length(x)
+		globalveclen <- as.integer(3 * n)
+		globalvec2 = .C(
+				"gen_z_givenlocs_exact",
+				as.double(x),
+				as.integer((n)),
+				as.double(y),
+				as.integer((n)),
+				as.double(sigma_sq),
+				as.double(beta),
+				as.double(nu),
+				as.integer(dmetric),
+				as.integer(n),
+				as.integer(ncores),
+				as.integer(ngpus),
+				as.integer(dts),
+				as.integer(pgrid),
+				as.integer(qgrid),
+				as.integer(globalveclen),
+				globalvec = double(globalveclen)
+				)$globalvec
+		newList <- list(
+				"x" = x[1:n],
+				"y" = y[1:n],
+				"z" = globalvec2[1:n]
+		)
+		print("back from gen_z_givenlocs_exact  C function call. Hit key....")
+		return(newList)
+	}

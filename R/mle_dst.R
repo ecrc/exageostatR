@@ -38,37 +38,54 @@ library(assertthat)
 #' print(result)
 #' exageostat_finalize() ## Finalize exageostat instance
 dst_mle <-
-  function(data = list(x, y, z),
-           dst_band,
-           dmetric = c("euclidean", "great_circle"),
-           optimization = list(
-             clb = c(0.001, 0.001, 0.001),
-             cub = c(5, 5, 5),
-             tol = 1e-4,
-             max_iters = 100
-           )) {
-    dmetric <- arg_check_mle(data, dmetric, optimization)
-    assert_that(length(dst_band) == 1)
-    assert_that(dst_band >= 1)
-    n <- length(data$x)
-    dmetric <- as.integer(dmetric)
-    n <- as.integer(n)
-    dst_band <- as.integer(dst_thick)
-    optimization$max_iters <- as.integer(optimization$max_iters)
-    theta_out2 <- .C("mle_dst", data$x, n, data$y, n, data$z, n, optimization$clb, 3,
-      optimization$cub, 3, dst_band, dmetric, n, optimization$tol, optimization$max_iters,
-      ncores, ngpus, dts, pgrid, qgrid,
-      theta_out = double(6)
-    )$theta_out
-    newList <-
-      list(
-        "sigma_sq" = theta_out2[1],
-        "beta" = theta_out2[2],
-        "nu" = theta_out2[3],
-        "time_per_iter" = theta_out2[4],
-        "total_time" = theta_out2[5],
-        "no_iters" = theta_out2[6]
-      )
-    print("MLE function (done). Hit key....")
-    return(newList)
-  }
+	function(data = list(x, y, z),
+		 dst_band,
+		 dmetric = c("euclidean", "great_circle"),
+		 optimization = list(
+				     clb = c(0.001, 0.001, 0.001),
+				     cub = c(5, 5, 5),
+				     tol = 1e-4,
+				     max_iters = 100
+				     )) {
+		dmetric <- arg_check_mle(data, dmetric, optimization)
+		assert_that(length(dst_band) == 1)
+		assert_that(dst_band >= 1)
+		n <- length(data$x)
+		n <- as.integer(n)
+		optimization$max_iters <- as.integer(optimization$max_iters)
+		theta_out2 = .C(
+				"mle_exact",
+				as.double(data$x),
+				as.integer((n)),
+				as.double(data$y),
+				as.integer((n)),
+				as.double(data$z),
+				as.integer((n)) ,
+				as.double(optimization$clb),
+				as.integer((3)),
+				as.double(optimization$cub),
+				as.integer((3)),
+				as.integer(dmetric),
+				as.integer(n),
+				as.double(optimization$tol),
+				as.integer(optimization$max_iters),
+				as.integer(ncores),
+				as.integer(ngpus),
+				as.integer(dts),
+				as.integer(pgrid),
+				as.integer(qgrid),
+				theta_out = double(6)
+				)$theta_out
+
+		newList <-
+			list(
+			     "sigma_sq" = theta_out2[1],
+			     "beta" = theta_out2[2],
+			     "nu" = theta_out2[3],
+			     "time_per_iter" = theta_out2[4],
+			     "total_time" = theta_out2[5],
+			     "no_iters" = theta_out2[6]
+			)
+		print("MLE_DST function (done). Hit key....")
+		return(newList)
+	}
