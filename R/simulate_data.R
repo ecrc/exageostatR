@@ -43,21 +43,23 @@ simulate_data_exact <-
            dmetric = c("euclidean", "great_circle"),
            n,
            seed = 0) {
+	  
 	  dmetric <- arg_check_sim(sigma_sq, beta, nu, dmetric)
-    assert_that(length(n) == 1)
-    assert_that(n >= 1)
-    assert_that(length(seed) == 1)
-    dmetric <- as.integer(dmetric)
-    n <- as.integer(n)
-    seed <- as.integer(seed)
-    globalveclen <- as.integer(3 * n)
-    globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, ncores, 
-		     ngpus, dts, pgrid, qgrid, globalveclen,
-		     globalvec = double(globalveclen)
-		     )$globalvec
-    print("Synthetic data have been generated")
-	       	newList <-
-	    list(
+	  assert_that(length(n) == 1)
+	  assert_that(n >= 1)
+	  assert_that(length(seed) == 1)
+	  dmetric <- as.integer(dmetric)
+	  n <- as.integer(n)
+	  seed <- as.integer(seed)
+	  globalveclen <- as.integer(3 * n)
+	  globalvec2 <- .C("gen_z_exact", sigma_sq, beta,
+			   nu, dmetric, n, seed, ncores, 
+			   ngpus, dts, pgrid, qgrid, globalveclen,
+			   globalvec = double(globalveclen)
+			   )$globalvec
+	  print("Synthetic spatial data have been generated")
+	  newList <-
+		  list(
 		 "x" = globalvec2[1:n],
 		 "y" = globalvec2[(n + 1):(2 * n)],
 		 "z" = globalvec2[((2 * n) + 1):(3 * n)]
