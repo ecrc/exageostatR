@@ -35,26 +35,43 @@ library(assertthat)
 #' result <- exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-4, max_iters = 1))
 #' print(result)
 #' exageostat_finalize() ## Finalize exageostat instance
+
 exact_mle <-
-  function(data = list(x, y, z),
-           dmetric = c("euclidean", "great_circle"),
+  function(data = list (x, y, z),
+           dmetric = 0,
            optimization = list(
              clb = c(0.001, 0.001, 0.001),
              cub = c(5, 5, 5),
              tol = 1e-4,
              max_iters = 100
-           )) {
-    dmetric <- arg_check_mle(data, dmetric, optimization)
-    n <- length(data$x)
-    dmetric <- as.integer(dmetric)
-    n <- as.integer(n)
-    optimization$max_iters <- as.integer(optimization$max_iters)
-    theta_out2 <- .C("mle_exact", data$x, n, data$y, n, data$z, n, optimization$clb, 3,
-      optimization$cub, 3, dmetric, n, optimization$tol, optimization$max_iters, ncores,
-      ngpus, dts, pgrid, qgrid,
+           ))
+  {
+    n = length(data$x)
+    theta_out2 = .C(
+      "mle_exact",
+      as.double(data$x),
+      as.integer((n)),
+      as.double(data$y),
+      as.integer((n)),
+      as.double(data$z),
+      as.integer((n)) ,
+      as.double(optimization$clb),
+      as.integer((3)),
+      as.double(optimization$cub),
+      as.integer((3)),
+      as.integer(dmetric),
+      as.integer(n),
+      as.double(optimization$tol),
+      as.integer(optimization$max_iters),
+      as.integer(ncores),
+      as.integer(ngpus),
+      as.integer(dts),
+      as.integer(pgrid),
+      as.integer(qgrid),
       theta_out = double(6)
     )$theta_out
-
+    #theta_out[1:6] <- theta_out2[1:6]
+    print("back from mle_exact C function call. Hit key....")
     newList <-
       list(
         "sigma_sq" = theta_out2[1],
@@ -64,6 +81,5 @@ exact_mle <-
         "total_time" = theta_out2[5],
         "no_iters" = theta_out2[6]
       )
-    print("MLE function (done). Hit key....")
     return(newList)
   }

@@ -36,36 +36,38 @@ library(assertthat)
 #' data <- simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed) ## Generate Z observation vector
 #' data
 #' exageostat_finalize() ## Finalize exageostat instance
-simulate_data_exact <-
-  function(sigma_sq,
-           beta,
-           nu,
-           dmetric = c("euclidean", "great_circle"),
-           n,
-           seed = 0) {
-    dmetric <- arg_check_sim(sigma_sq, beta, nu, dmetric)
-    assert_that(length(n) == 1)
-    assert_that(n >= 1)
-    assert_that(length(seed) == 1)
-    dmetric <- as.integer(dmetric)
-    n <- as.integer(n)
-    seed <- as.integer(seed)
-    globalveclen <- as.integer(3 * n)
+ simulate_obs_exact <-
+  function(x, y, sigma_sq, beta, nu, dmetric = 0)
+  {
+    n = length(x)
+    globalveclen = 3 * n
     globalvec  = vector (mode = "double", length = globalveclen)
-    globalvec2 <- .C("gen_z_exact", as.double(sigma_sq), as.double(beta),
-                     as.double(nu), as.integer(dmetric), as.integer(n),
-                     as.integer(seed), as.integer(ncores), as.integer(ngpus),
-                     as.integer(dts), as.integer(pgrid), as.integer(qgrid),
-                     as.integer(globalveclen),
-                     globalvec = double(globalveclen)
-                     )$globalvec
-    newList <-
-	    list(
-		 "x" = globalvec2[1:n],
-		 "y" = globalvec2[(n + 1):(2 * n)],
-		 "z" = globalvec2[((2 * n) + 1):(3 * n)]
-	    )
+    globalvec2 = .C(
+      "gen_z_givenlocs_exact",
+      as.double(x),
+      as.integer((n)),
+      as.double(y),
+      as.integer((n)),
+      as.double(sigma_sq),
+      as.double(beta),
+      as.double(nu),
+      as.integer(dmetric),
+      as.integer(n),
+      as.integer(ncores),
+      as.integer(ngpus),
+      as.integer(dts),
+      as.integer(pgrid),
+      as.integer(qgrid),
+      as.integer(globalveclen),
+      globalvec = double(globalveclen)
+    )$globalvec
+    #globalvec[1:globalveclen] <- globalvec2[1:globalveclen]
+    print(n)
+    print(globalveclen)
 
-    print("Synthetic data have been generated ... Hit key....")
+    newList <- list("x" = x[1:n],
+                    "y" = y[1:n],
+                    "z" = globalvec2[1:n])
+    print("back from gen_z_givenlocs_exact  C function call. Hit key....")
     return(newList)
-  }
+  }}
