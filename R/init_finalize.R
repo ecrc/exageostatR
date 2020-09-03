@@ -26,16 +26,7 @@ library(assertthat)
 #' exageostat_init(hardware = list(ncores = 1, ngpus = 2, ts = 320, lts = 0, pgrid = 1, qgrid = 1))
 #' exageostat_init(hardware = list(ncores = 26, ngpus = 0, ts = 320, lts = 0, pgrid = 3, qgrid = 4))
 exageostat_init <-
-  function(hardware = list (
-    ncores = 2,
-    ngpus = 0,
-    ts = 320,
-    lts = 0,
-    pgrid = 1,
-    qgrid = 1
-  ),
-  globalveclen)
-  {
+  function(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) {
     ncores <<- hardware$ncores
     ngpus <<- hardware$ngpus
     dts <<- hardware$ts
