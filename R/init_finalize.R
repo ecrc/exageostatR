@@ -31,7 +31,7 @@ exageostat_init <-
     if(exists("active_instance") && active_instance == 1)
     {
         print("There is already an active instance... Hit key....")
-        return
+        return 0
     }
     ncores <<- hardware$ncores
     ngpus <<- hardware$ngpus
@@ -40,6 +40,14 @@ exageostat_init <-
     pgrid <<- hardware$pgrid
     qgrid <<- hardware$qgrid
     active_instance <<- 1
+
+    assert_that(ncores >= 0)
+    assert_that(ngpus >= 0)
+    assert_that(dts > 0)
+    assert_that(lts >= 0)
+    assert_that(pgrid > 0)
+    assert_that(qgrid > 0)
+
     Sys.setenv(OMP_NUM_THREADS = 1)
     Sys.setenv(STARPU_CALIBRATE = 1)
     Sys.setenv(STARPU_SILENT = 1) 
