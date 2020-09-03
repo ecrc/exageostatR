@@ -54,7 +54,7 @@ exageostat_init <-
     Sys.setenv(STARPU_SILENT = 1)
     Sys.setenv(KMP_AFFINITY = "disabled")
     .C("rexageostat_init", ncores, ngpus, dts)
-    print("An ExaGeoStatR instance is active now... Hit key....")
+    print("ExaGeoStatR instance activated... Hit key....")
   }
 
 #' Finalize the current instance of ExaGeoStatR
