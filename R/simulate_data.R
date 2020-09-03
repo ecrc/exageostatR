@@ -52,10 +52,13 @@ simulate_data_exact <-
     seed <- as.integer(seed)
     globalveclen <- as.integer(3 * n)
     globalvec  = vector (mode = "double", length = globalveclen)
-    globalvec2 <- .C("gen_z_exact", sigma_sq, beta, nu, dmetric, n, seed, ncores, 
-		     ngpus, dts, pgrid, qgrid, globalveclen,
-		     globalvec = double(globalveclen)
-		     )$globalvec
+    globalvec2 <- .C("gen_z_exact", as.double(sigma_sq), as.double(beta),
+                     as.double(nu), as.integer(dmetric), as.integer(n),
+                     as.integer(seed), as.integer(ncores), as.integer(ngpus),
+                     as.integer(dts), as.integer(pgrid), as.integer(qgrid),
+                     as.integer(globalveclen),
+                     globalvec = double(globalveclen)
+                     )$globalvec
     newList <-
 	    list(
 		 "x" = globalvec2[1:n],
