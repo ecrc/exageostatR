@@ -30,7 +30,7 @@ exageostat_init <-
 
     if(exists("active_instance") && active_instance == 1)
     {
-        print("There is already an active instance... Hit key....")
+        print("There is already an active ExaGeoStatR instance.")
         return
     }
 
@@ -54,7 +54,7 @@ exageostat_init <-
     Sys.setenv(STARPU_SILENT = 1)
     Sys.setenv(KMP_AFFINITY = "disabled")
     .C("rexageostat_init", ncores, ngpus, dts)
-    print("ExaGeoStatR instance is active now... Hit key....")
+    print("ExaGeoStatR instance is active now.")
   }
 
 #' Finalize the current instance of ExaGeoStatR
@@ -66,8 +66,8 @@ exageostat_finalize <- function() {
   {
      .C("rexageostat_finalize")
       active_instance <<- 0
-     print("ExaGeoStatR instance closed... Hit key....")
+     print("ExaGeoStatR instance closed.")
   }
   else
-     print("No active instances... Hit key....")
+     print("No active instances.")
 }
