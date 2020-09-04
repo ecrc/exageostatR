@@ -1,4 +1,4 @@
 [submodule "src"]
 	path = src
-	url = https://github.com/ecrc/exageostat.git
-	branch = master
+    url = https://github.com/ecrc/exageostat.git
+    branch = release/v0.1.0

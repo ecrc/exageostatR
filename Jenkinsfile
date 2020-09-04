@@ -77,8 +77,8 @@ Rscript tests/test1.R
 '''
             }
         }
-        stage ('build-gpu') {
-            agent { label 'jenkinsfile-gpu' }
+  /*      stage ('build-gpu') {
+            agent { label 'gpu' }
             steps {
                 sh '''#!/bin/bash -le
 module purge
@@ -106,6 +106,7 @@ Rscript tests/test1.R
 '''
             }
         }
+        */
     }
 
     // Post build actions
