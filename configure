@@ -437,11 +437,11 @@ echo "======================================"
 cd $BASEDIR
 set -x
 # CHAMELEON
-if pkg-config --exists chameleon
-then
-	_LOCATION=`pkg-config --variable=prefix chameleon`
-	echo "CHAMELEON FOUND in [$_LOCATION]"
-else
+#if pkg-config --exists chameleon
+#then
+#	_LOCATION=`pkg-config --variable=prefix chameleon`
+#	echo "CHAMELEON FOUND in [$_LOCATION]"
+#else
 	if [ "$BUILD_DEPENDENCIES" == "true" ]
 	then
 		echo "Building CHAMELEON..."
@@ -471,7 +471,7 @@ else
 		echo ""
 		err=1
 	fi
-fi
+#fi
 
 
 echo "============CHAMELEON======================"
@@ -479,11 +479,11 @@ echo "$(ls $PREFIX/lib)"
 echo "======================================"
 
 # starsh
-if pkg-config --exists --atleast-version=0.1.1 starsh
-then
-	_LOCATION=`pkg-config --variable=prefix starsh`
-	echo "starsh FOUND in [$_LOCATION]"
-else
+#if pkg-config --exists --atleast-version=0.1.1 starsh
+#then
+#	_LOCATION=`pkg-config --variable=prefix starsh`
+#	echo "starsh FOUND in [$_LOCATION]"
+#else
 	if [ "$BUILD_DEPENDENCIES" == "true" ]
 	then
 		echo "Building STARS-H..."
@@ -507,17 +507,17 @@ else
 		echo ""
 		err=1
 	fi
-fi
+#fi
 
 echo "============STARSH======================"
 echo "$(ls $PREFIX/lib)"
 echo "======================================"
 # hicma
-if pkg-config --exists  hicma
-then
-	_LOCATION=`pkg-config --variable=prefix hicma`
-	echo "hicma FOUND in [$_LOCATION]"
-else
+#if pkg-config --exists  hicma
+#then
+#	_LOCATION=`pkg-config --variable=prefix hicma`
+#	echo "hicma FOUND in [$_LOCATION]"
+#else
 	if [ "$BUILD_DEPENDENCIES" == "true" ]
 	then
 		echo "Building HiCMA..."
@@ -537,7 +537,7 @@ else
 		echo ""
 		err=1
 	fi
-fi
+#fi
 
 echo "============HICMA======================"
 echo "$(ls $PREFIX/lib)"
