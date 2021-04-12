@@ -26,6 +26,7 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_PACKAGE_DIR/exageostat/lib/pkgconfig 
 #STRARPU_HOME=$TMPDIR
 
 echo "==========================================="
+mv ./patches/stars-h.patch $TMPDIR
 echo $TMPDIR
 echo $OPENBLAS_ROOT
 echo $OPEMBLASROOT
@@ -493,6 +494,7 @@ echo "======================================"
 		git clone https://github.com/ecrc/stars-h stars-h
 		cd stars-h
 		git checkout 687c2dc6df085655959439c38a40ccbe7cb57f82
+		git apply ../stars-h.patch
 		git submodule update --init --recursive 2>&1 >/dev/null || true
 		mkdir -p build && cd build
 		rm -rf ./CMake*
