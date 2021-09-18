@@ -453,6 +453,7 @@ set -x
 		git submodule update --init --recursive 2>&1 >/dev/null || true
 		cd chameleon
 		git checkout 8595b23
+        git submodule update --init --recursive 2>&1 >/dev/null || true
 		#cp -r $BASEDIR/src/hicma $TMPDIR/h
 		#cd $TMPDIR/h/chameleon
 		mkdir -p build && cd build
