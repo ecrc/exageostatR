@@ -24,6 +24,8 @@ Getting Started
 
 ### Installation
 
+For more details, you can check the complete [Installation Guide](./InstallationGuide.md)
+
 #### Software dependencies
 1. BLAS/CBLAS/LAPACK/LAPACKE optimized implementation, ex.,  AMD Core Math Library (ACML), Arm Performance Libraries, ATLAS, Intel Math Kernel Library (MKL), or OpenBLAS.
 2. [Portable Hardware Locality (hwloc)](https://www.open-mpi.org/projects/hwloc/).
@@ -73,7 +75,7 @@ install_git(url="https://github.com/ecrc/exageostatR", configure.args=C('--enabl
 2. Use R to install exageostat_1.0.1.tar.gz)
 
 ```r
-install.packages(repos=NULL, "exageostat_1.0.1.tar.gz"))
+install.packages(repos=NULL, "exageostat_1.0.1.tar.gz")
 ```
 
 
