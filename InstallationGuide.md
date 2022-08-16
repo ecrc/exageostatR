@@ -200,103 +200,66 @@ You can verify your installation by running any of the following examples
 
 1) Synthetic generation of geospatial data with MLE exact computation,
 ```R
-library("exageostat") #Load ExaGeoStat-R lib.
-seed = 0 #Initial seed to generate XY locs.
-theta1 = 1 #Initial variance.
-theta2 = 0.1 #Initial range.
-theta3 = 0.5 #Initial smoothness.
-dmetric = 0 #0 --> Euclidean distance, 1--> great circle distance.
-n = 1600 #n*n locations grid.
-ncores = 2 #Number of underlying CPUs.
-gpus = 0 #Number of underlying GPUs.
-ts = 320 #Tile_size: changing it can improve the performance.
-p_grid = 1 #More than 1 in the case of distributed systems.
-q_grid = 1 #More than 1 in the case of distributed systems.
-clb = vector(mode="double",length = 3) #Optimization lower bounds values.
-cub = vector(mode="double",length = 3) #Optimization upper bounds values.
-theta_out = vector(mode="double",length = 3) #Parameter vector output.
-globalveclen = 3*n
-vecs_out = vector(mode="double",length = globalveclen)#Z measurements of n locations.
-clb = as.double(c("0.01", "0.01", "0.01")) #Optimization lower bounds.
-cub = as.double(c("5.00", "5.00", "5.00")) #Optimization upper bounds.
-vecs_out[1:globalveclen] = -1.99
-theta_out[1:3] = -1.99
-exageostat_initR(ncores, gpus, ts) #Initiate exageostat instance.
-vecs_out = exageostat_egenzR(n, ncores, gpus, ts, p_grid, q_grid,
-theta1, theta2, theta3, dmetric, seed, globalveclen) #Generate Z observation vector.
-theta_out = exageostat_emleR(n, ncores, gpus, ts, p_grid, q_grid,
-vecs_out[1:n], vecs_out[n+1:(2*n)],
-vecs_out[(2*n+1):(3*n)], clb, cub, dmetric, 0.0001, 20) #Exact Estimation (MLE).
-exageostat_finalizeR() #Finalize exageostat instance
+library("exageostatr")  #Load ExaGeoStatR lib.
+seed = 0                #Initial seed to generate XY locs.
+sigma_sq = 1            #Initial variance.
+beta = 0.1              #Initial range.
+nu = 0.5                #Initial smoothness.
+dmetric = "euclidean"   #"euclidean", or "great_circle".
+n = 1600                #n*n locations grid.
+exageostat_init(hardware = list (ncores=2, ngpus=0,
+                                 ts=320, pgrid=1, qgrid=1))	  #Initiate exageostat instance.
+data = simulate_data_exact(sigma_sq, beta, nu,
+                                    dmetric, n, seed) 		  #Generate Z observation vector.
+result = exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), 
+                                                      cub = c(5, 5,5 ), 
+                                                      tol = 1e-4, max_iters = 20))   #Estimate MLE parameters (Exact).
+exageostat_finalize()	#Finalize exageostat instance.
 ```
 ========================================================================
 
 2)  Synthetic generation of Geo-spatial data with MLE TLR computation
 ```R
-library("exageostat") #Load ExaGeoStat-R lib.
-seed = 0 #Initial seed to generate XY locs.
-theta1 = 1 #Initial variance.
-theta2 = 0.03 #Initial range.
-theta3 = 0.5 #Initial smoothness.
-dmetric = 0 #0 --> Euclidean distance, 1--> great circle distance.
-n = 900 #n*n locations grid.
-ncores = 4 #Number of underlying CPUs.
-gpus = 0 #Number of underlying GPUs.
-ts = 320 #Tile_size: changing it can improve the performance.
-lts = 600 #TLR_Tile_size: changing it can improve the performance.
-tlr_acc = 7 #approximation accuracy 10^-(acc).
-tlr_maxrank = 450 #Max rank.
-p_grid = 1 #More than 1 in the case of distributed systems.
-q_grid = 1 #More than 1 in the case of distributed systems.
-clb = vector(mode="double",length = 3) #Optimization lower bounds values.
-cub = vector(mode="double",length = 3) #Optimization upper bounds values.
-theta_out = vector(mode="double",length = 3) #Parameter vector output.
-globalveclen = 3*n
-vecs_out = vector(mode="double",length = globalveclen)#Z measurements of n locations.
-clb = as.double(c("0.01", "0.01", "0.01")) #Optimization lower bounds.
-cub = as.double(c("5.00", "5.00", "5.00")) #Optimization upper bounds.
-vecs_out[1:globalveclen] = -1.99
-theta_out[1:3] = -1.99
-exageostat_initR(ncores, gpus, ts) #Initiate exageostat instance.
-vecs_out = exageostat_egenzR(n, ncores, gpus, ts, p_grid, q_grid,
-theta1, theta2, theta3, dmetric, seed, globalveclen) #Generate Z observation vector.
-theta_out = exageostat_tlrmleR(n, ncores, gpus, lts, p_grid, q_grid,
-vecs_out[1:n], vecs_out[n+1:(2*n)], vecs_out[(2*n+1):(3*n)],
-clb, cub, tlr_acc, tlr_maxrank, dmetric, 0.0001, 20) #TLR Estimation (MLE).
-exageostat_finalizeR() #Finalize exageostat instance.
+library("exageostatr") #Load ExaGeoStatR lib.
+seed = 0               #Initial seed to generate XY locs.
+sigma_sq = 1           #Initial variance.
+beta = 0.03            #Initial range.
+nu = 0.5               #Initial smoothness.
+dmetric = "euclidean"  #"euclidean", or "great_circle".
+n = 900                #n*n locations grid.
+tlr_acc = 7            #TLR accuracy 10^-(acc).
+tlr_maxrank = 450      #TLR Max Rank.
+
+exageostat_init(hardware = list (ncores=2, ngpus=0,
+                                 ts=320, lts=600,  pgrid=1, qgrid=1)) #Initiate exageostat instance.
+data = simulate_data_exact(sigma_sq, beta, nu, dmetric, n, seed)      #Generate Z observation vector.
+result = tlr_mle(data, tlr_acc, tlr_maxrank,  dmetric, 
+                 optimization = list(clb = c(0.001, 0.001, 0.001), 
+                                     cub = c(5, 5,5 ), tol = 1e-4, 
+                                     max_iters = 20))		          #Estimate MLE parameters (TLR).
+exageostat_finalize()  #Finalize exageostat instance.
 ```
 ========================================================================
 
 3)  Synthetic generation of Geo-spatial data with MLE DST computation
 ```R
-library("exageostat") #Load ExaGeoStat-R lib.
-seed = 0 #Initial seed to generate XY locs.
-theta1 = 1 #Initial variance.
-theta2 = 0.1 #Initial range.
-theta3 = 0.5 #Initial smoothness.
-dmetric = 0 #0 --> Euclidean distance, 1--> great circle distance.
-n = 1600 #n*n locations grid.
-ncores = 2 #Number of underlying CPUs.
-gpus = 0 #Number of underlying GPUs.
-ts = 320 #Tile_size: changing it can improve the performance.
-p_grid = 1 #More than 1 in the case of distributed systems.
-q_grid = 1 #More than 1 in the case of distributed systems.
-clb = vector(mode="double",length = 3) #Optimization lower bounds values.
-cub = vector(mode="double",length = 3) #Optimization upper bounds values.
-theta_out = vector(mode="double",length = 3) #Parameter vector output.
-globalveclen = 3*n
-vecs_out = vector(mode="double",length = globalveclen)#Z measurements of n locations.
-clb = as.double(c("0.01", "0.01", "0.01")) #Optimization lower bounds.
-cub = as.double(c("5.00", "5.00", "5.00")) #Optimization upper bounds.
-vecs_out[1:globalveclen] = -1.99
-theta_out[1:3] = -1.99
-exageostat_initR(ncores, gpus, ts) #Initiate exageostat instance.
-vecs_out = exageostat_egenzR(n, ncores, gpus, ts, p_grid, q_grid,
-theta1, theta2, theta3, dmetric, seed, globalveclen) #Generate Z observation vector.
-theta_out = exageostat_dstmleR(n, ncores, gpus, ts, p_grid, q_grid,
-vecs_out[1:n], vecs_out[n+1:(2*n)],
-vecs_out[(2*n+1):(3*n)], clb, cub, dmetric, 0.0001, 20) #DST Estimation (MLE).
-exageostat_finalizeR() #Finalize exageostat instance
+library("exageostatr")  #Load ExaGeoStatR lib.
+seed = 0                #Initial seed to generate XY locs.
+sigma_sq = 1            #Initial variance.
+beta = 0.03             #Initial range.
+nu = 0.5                #Initial smoothness.
+dmetric = "euclidean"   #"euclidean", or "great_circle".
+n = 900                 #n*n locations grid.
+dst_band = 3            #Number of diagonal double tiles.
+exageostat_init(hardware = list (ncores=4, ngpus=0,
+                                 ts=320, lts=0,  pgrid=1, qgrid=1))	  #Initiate exageostat instance.
+data = simulate_data_exact(sigma_sq, beta, nu, 
+                           dmetric, n, seed) 	                      #Generate Z observation vector.
+result = dst_mle(data, dst_band, dmetric, 
+                 optimization = list(clb = c(0.001, 0.001, 0.001), 
+                                     cub = c(5, 5,5 ), tol = 1e-4, 
+                                     max_iters = 20))				 #Estimate MLE parameters (DST).
+exageostat_finalize()	#Finalize exageostat instance.
 ```
 
 ========================================================================
@@ -304,38 +267,21 @@ exageostat_finalizeR() #Finalize exageostat instance
 4) Synthetic generation of measurements based on given
    geospatial data locations with MLE Exact computation
 ```r
-library("exageostat") #Load ExaGeoStat-R lib.
-seed = 0 #Initial seed to generate XY locs.
-theta1 = 1 #Initial variance.
-theta2 = 0.1 #Initial range.
-theta3 = 0.5 #Initial smoothness.
-dmetric = 0 #0 --> Euclidean distance, 1--> great circle distance.
-n = 1600 #n*n locations grid.
-ncores = 2 #Number of underlying CPUs.
-gpus = 0 #Number of underlying GPUs.
-ts = 320 #Tile_size: changing it can improve the performance.
-p_grid = 1 #More than 1 in the case of distributed systems.
-q_grid = 1 #More than 1 in the case of distributed systems.
-clb = vector(mode="double",length = 3) #Optimization lower bounds values.
-cub = vector(mode="double",length = 3) #Optimization upper bounds values.
-theta_out = vector(mode="double",length = 3) #Parameter vector output.
-globalveclen = 3*n
-x = rnorm(n = globalveclen, mean = 39.74, sd = 25.09)
-#X dimension vector of n locations.
-y = rnorm(n = globalveclen, mean = 80.45, sd = 100.19)
-#Y dimension vector of n locations.
-vecs_out = vector(mode="double",length = globalveclen)#Z measurements of n locations.
-clb = as.double(c("0.01", "0.01", "0.01")) #Optimization lower bounds.
-cub = as.double(c("5.00", "5.00", "5.00")) #Optimization upper bounds.
-vecs_out[1:globalveclen] = -1.99
-theta_out[1:3] = -1.99
-exageostat_initR(ncores, gpus, ts) #Initiate exageostat instance.
-vecs_out = exageostat_egenz_glR(n, ncores, gpus, ts, p_grid, q_grid,
-x, y, theta1, theta2, theta3,
-dmetric, globalveclen) #Generate Z observation vector based on given locations.
-theta_out = exageostat_emleR(n, ncores, gpus, ts, p_grid, q_grid,
-vecs_out[1:n], vecs_out[n+1:(2*n)],
-vecs_out[(2*n+1):(3*n)], clb, cub, dmetric, 0.0001, 20) #Exact Estimation (MLE).
-exageostat_finalizeR() #Finalize exageostat instance
+library("exageostatr")          #Load ExaGeoStatR lib.
+sigma_sq = 1                    #Initial variance.
+beta = 0.1                      #Initial range.
+nu = 0.5                        #Initial smoothness.
+dmetric = "euclidean"           #"euclidean", or "great_circle", 
+n = 1600                        #n*n locations grid.
+x = rnorm(n = 1600, mean = 39.74, sd = 25.09)   #x measurements of n locations.
+y = rnorm(n = 1600, mean = 80.45, sd = 100.19)  #y measurements of n locations.
+exageostat_init(hardware = list (ncores=2, ngpus=0,
+                                 ts=320, lts=0,  pgrid=1, qgrid=1))	 #Initiate exageostat instance.
+data = simulate_obs_exact( x, y, sigma_sq, 
+                           beta, nu, dmetric) #Generate Z observation vector.
+result = exact_mle(data, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), 
+                                                      cub = c(5, 5,5 ), tol = 1e-4, 
+                                                      max_iters = 20))
+exageostat_finalize()	      #Finalize exageostat instance.
 ```
 
