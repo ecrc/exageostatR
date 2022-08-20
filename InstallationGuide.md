@@ -104,7 +104,7 @@ $./configure
 $ make -j && make -j install
 ```
 
-### StarPU >= 1.3.9
+### StarPU >= 1.3.0
 
 ```shell
 $ wget https://files.inria.fr/starpu/starpu-1.3.9/starpu-1.3.9.tar.gz
