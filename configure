@@ -1,68 +1,27 @@
 #!/usr/bin/env bash
 
 # Configure script for R package generation
-#
-#
-#
 
-#Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv("PKG_CONFIG_PATH"),paste(.libPaths(),"exageostat/lib/pkgconfig",sep='/',collapse=':'),sep=':'))
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:${R_HOME}/exageostat/lib/pkgconfig
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_LIBS_USER/exageostat/lib/pkgconfig
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_LIBS/exageostat/lib/pkgconfig
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$R_PACKAGE_DIR/exageostat/lib/pkgconfig # if user uses -l option
 
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${R_HOME}/exageostat/lib
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_LIBS_USER/exageostat/lib
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_LIBS/exageostat/lib
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R_PACKAGE_DIR/exageostat/lib
+export BASEDIR=$(pwd)
 
-#export CPATH=$CPATH:$R_INCLUDE_DIR
-
-
-#export CPATH=$R_INCLUDE_DIR
-#export C_INCLUDE_PATH=$R_INCLUDE_DIR
-#export CPLUS_INCLUDE_PATH=$R_INCLUDE_DIR
-#export GCC_INCLUDE_DIR=$R_INCLUDE_DIR
-#STRARPU_HOME=$TMPDIR
-
-echo "==========================================="
-echo $TMPDIR
-echo $OPENBLAS_ROOT
-echo $OPEMBLASROOT
-echo $R_PACKAGE_DIR
-echo $R_INCLUDE_DIR
-echo ${R_HOME}
-echo ${TMPDIR}
-echo ${TEMPDIR}
-echo ${TMPDIR}
-echo ${TMP}
-echo ${TEMP}
-echo "============================================"
-#echo -e " \033[38;2;255;0;0m CMake is required and not found!"
-#echo -e " \033[0;0;0;0;0m"
-#Get the number of CPUs
-cpucores=`getconf _NPROCESSORS_ONLN`
-#cpucores=1
-
-#VARIABLES
-MAKE=${MAKE:-make -j $(cpucores) -l $((cpucores + 1))}
-BASEDIR=$(pwd)
 TMPDIR=$BASEDIR/_$$
-#export STARPU_HOME=~/trash"
-#TMPDIR="/tmp/exageostatr"
-BUILD_DEPENDENCIES='true'
+BUILD_DEPENDENCIES='TRUE'
 err=0
 
-CUDAVALUE="OFF"
-MPIVALUE="OFF"
+CUDA_VALUE="OFF"
+MPI_VALUE="OFF"
 
-
-mkdir -p $TMPDIR
-
+mkdir -p "$TMPDIR"
 SETUP_DIR=${R_PACKAGE_DIR:-''}
 
 print_usage() {
-	echo "usage: $0 [--enable-mpi|--disable-mpi] [--prefix /path/to/install]"
+	echo "usage: $0 [--enable-mpi|--disable-mpi] [--enable-cuda|--disable-cuda] [--build-deps|--no-build-deps]
+	[--prefix /path/to/install]"
 }
 
 
@@ -70,15 +29,19 @@ while [ -n "$1"  ]
 do
 	case "$1" in
 		--enable-cuda)
-			CUDAVALUE="ON"
+			CUDA_VALUE="ON"
 			shift
 			;;
+    --disable-cuda)
+      CUDA_VALUE="OFF"
+      shift
+      ;;
 		--enable-mpi)
-			MPIVALUE="ON"
+			MPI_VALUE="ON"
 			shift
 			;;
 		--disable-mpi)
-			MPIVALUE="OFF"
+			MPI_VALUE="OFF"
 			shift
 			;;
 		--build-deps)
@@ -93,8 +56,8 @@ do
 			shift
 			SETUP_DIR=$1
 			# Set this paths as rpath during compilation
-			rpaths="-Wl,-rpath=$SETUP_DIR/lib -L$SETUP_DIR/lib "
-			echo "LDFLAGS += $rpaths " >> $BASEDIR/src/Makefile
+			r_paths="-Wl,-rpath=$SETUP_DIR/lib -L$SETUP_DIR/lib "
+			echo "LDFLAGS += $r_paths " >> "$BASEDIR"/src/Makefile
 			shift
 			;;
 		--help|-h)
@@ -110,11 +73,11 @@ done
 
 
 if [ -z "$SETUP_DIR" ]; then
-	# Use RLIBS for setup dir
-	arr=(`Rscript -e '.libPaths()' | awk '{Rprintf "%s ",$2}'`)
+	# Use R Library Paths for setup dir
+	mapfile -t arr < <(Rscript -e '.libPaths()')
 	for i in ${!arr[*]};
 	do
-		dir=`echo ${arr[$i]}|tr -d \"`
+		dir=$(echo "${arr[$i]}"| awk  '{print $2}'| tr -d \")
 		if [ -d "$dir" ] && [ -w "$dir" ]
 		then
 			SETUP_DIR="$dir/exageostat"
@@ -122,14 +85,16 @@ if [ -z "$SETUP_DIR" ]; then
 		fi
 	done
 fi
-mkdir -p $SETUP_DIR
 
 if [ -z "$SETUP_DIR" ]
 then
 	echo "Check your .libPaths() in R. Could not find a writable directory."
 	exit 1;
 fi
+
 PREFIX=$SETUP_DIR
+
+echo "Installation Directory Set to $PREFIX"
 
 ############################## Check OS
 echo "Finding the current os type"
@@ -139,436 +104,60 @@ case "$osType" in
 	"Darwin")
 		{
 			echo "Running on Mac OSX."
-			CURRENT_OS="OSX"
-			LIBEXT="dylib"
+			LIB_EXT="dylib"
 			export DYLD_LIBRARY_PATH=$PREFIX/lib:$DYLD_LIBRARY_PATH
 		} ;;
 "Linux")
-	{
-		echo "Running on LINUX."
-		CURRENT_OS="LINUX"
-		LIBEXT="so"
-		export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
-	} ;;
+    {
+      echo "Running on LINUX."
+      LIB_EXT="so"
+      export LD_LIBRARY_PATH=$PREFIX/lib:$LD_LIBRARY_PATH
+    } ;;
 *)
-	{
-		echo "Unsupported OS, exiting"
-		exit
-	} ;;
+    {
+      echo "Unsupported OS, exiting"
+      exit
+    } ;;
 esac
 
-
-# check submodules just in case
-#git submodule update --init --recursive 2>&1 >/dev/null || true
-
-##### check and build dependencies
-# prepare environment
+##### Check and build dependencies
+# Prepare environment
 export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
 
 if [ -n "$MKLROOT" ] && [ -d "$MKLROOT" ]; then
 	echo "mkl_dir directory exists!"
 	echo "Great... continue set-up"
-	source ${MKLROOT}/bin/mklvars.sh intel64
-	DEFINE_BLAS_LIBS_CMAKE="-DBLAS_LIBRARIES='-L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl'"
-	#DEFINE_BLAS_LIBS_CMAKE="-DBLAS_LIBRARIES='-L${MKLROOT}/lib\ -Wl,-rpath,${MKLROOT}/lib\ -lmkl_intel_lp64\ -lmkl_sequential\ -lmkl_core\ -lpthread\ -lm\ -ldl'"
-	XFLAG="-DBLA_VENDOR=Intel"
+	source "$MKLROOT"/bin/mklvars.sh intel64
 else
 	echo "MKL not found, trying to compile and use OpenBLAS"
-	XFLAG="-DBLA_VENDOR=Open"
-	USE_OPENBLAS='true'
 fi
 
-#set pkgconfig path including possible installation dir
+cd "$BASEDIR" || exit
+rm -rf CMake*
 
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SETUP_DIR/lib/pkgconfig
+CFLAGS="-fcommon" cmake \
+-DCMAKE_INSTALL_PREFIX="$PREFIX" \
+-DEXAGEOSTAT_SCHED_STARPU=ON \
+-DEXAGEOSTAT_USE_MPI=OFF \
+-DEXAGEOSTAT_PACKAGE=ON \
+-DCMAKE_BUILD_TYPE=Release \
+-DEXAGEOSTAT_USE_STARSH=ON \
+-DEXAGEOSTAT_USE_HICMA=ON \
+-DEXAGEOSTAT_USE_NETCDF=ON \
+-DEXAGEOSTAT_USE_CHAMELEON=ON \
+-DEXAGEOSTAT_INSTALL_DEPS=ON \
+-DBUILD_DEPENDENCIES=ON \
+-DMPI_VALUE="$MPI_VALUE" \
+-DCUDA_VALUE="$CUDA_VALUE" \
+-DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" \
+-DBUILD_SHARED_LIBS=ON ./src || exit 1;
 
-# openblas
-if [ "true" == "$USE_OPENBLAS" ]
-then
-	#obenblas will not be installed.
-	_OPENBLAS='true'
-	#     _OPENBLAS='false'
-	if pkg-config --exists openblas
-	then
-		#check for lapacke.h
-		#    _LOCATION=`pkg-config --variable=includedir openblas`
-		#    if stat "${_LOCATION}/lapacke.h" >/dev/null 2>&1
-		#   then
-		_LOCATION=`pkg-config --variable=libdir openblas`
-		echo "OpenBLAS FOUND in [$_LOCATION]"
-		_OPENBLAS='true'
-		# fi
-fi
-if [ -n "$OPENBLAS_ROOT" ] && [ -d "$OPENBLAS_ROOT" ]; 
-then
-	echo "OpenBLAS FOUND in [$OPENBLAS_ROOT]"
-	_OPENBLAS='true'
-fi
-if [ "false" == "${_OPENBLAS}" ]
-then 
-	if [ "$BUILD_DEPENDENCIES" == "true" ]
-	then
-		echo "Building OpenBLAS..."
-		cd $TMPDIR
-		wget https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz -O - | tar -zx
-		cd OpenBLAS-0.3.7
-		$MAKE -j PREFIX=$PREFIX >/dev/null|| $MAKE PREFIX=$PREFIX || { echo 'OpenBLAS installation failed' ; exit 1; }
-		$MAKE install PREFIX=$PREFIX
-		export CPATH=$PREFIX/include:$CPATH
-		export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
-		OPENBLAS_CFLAGS=`pkg-config --variable=includedir openblas`
-		OPENBLAS_LIBS=`pkg-config --variable=libdir openblas`
-		PKG_CPPFLAGS=`pkg-config --variable=includedir openblas`
-		PKG_LIBS=-l$PREFIX/lib/libopenblas.so
-		echo "========================="
-		echo $PKG_LIBS
-		echo "+++++++++++++++++++++++++="
-		#DEFINE_BLAS_LIBS_CMAKE="-DBLAS_DIR='${PREFIX}'  -DCBLAS_DIR='${PREFIX}' -DLAPACK_DIR='${PREFIX}' -DLAPACKE_DIR='${PREFIX}' -DTMG='${PREFIX}'"
-		#export OPENBLAS_CFLAGS=-I$PREFIX/include
-		#export OPENBLAS_LIBS=-L$PREFIX/lib
-		#export BLAS_OPENBLAS_CFLAGS=-I{$PREFIX/include
-		export BLAS_OPENBLAS_LIBS=-l$PREFIX/lib/libopenblas.so
-		#cp $PREFIX/lib/libopenblas.so $BASEDIR/src
-		#export BLAS_LIBS=-L{$PREFIX}/lib
-	else
-		echo "####################"
-		echo "OpenBLAS NOT FOUND"
-		echo "Please download it from: https://github.com/xianyi/OpenBLAS/releases"
-		echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-		echo ""
-		err=1
-	fi
-fi
-fi
-
-# gsl
-if pkg-config --exists --atleast-version=2 gsl
-then
-	_LOCATION=`pkg-config --variable=prefix gsl`
-	echo "gsl FOUND in [$_LOCATION]"
-else
-	if [ "$BUILD_DEPENDENCIES" == "true" ]
-	then
-		echo "Building GSL..."
-		cd $TMPDIR
-		wget https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz -O - | tar -zx
-		cd gsl-2.4
-		./configure --prefix=$PREFIX
-		$MAKE || $MAKE VERBOSE=1 || { echo 'GSL installation failed' ; exit 1; }
-		$MAKE install
-	else
-		echo "####################"
-		echo "gsl NOT FOUND"
-		echo "Please download it from: https://ftp.gnu.org/gnu/gsl/gsl-2.4.tar.gz"
-		echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-		echo ""
-		err=1
-	fi
-fi
-
-echo "==========================================="
-#EXAGEOSTAT_CONFIG=`Rscript -e '.libPaths()' | awk '{printf "%s/exageostat/lib/pkgconfig:",substr($2,2,length($2)-2)}'`
-echo ${R_HOME}
-echo "==========================================="
-echo $R_LIBS_USER
-echo "==========================================="
-echo $R_LIBS
-echo "==========================================="
-#Rscript -e '.libPaths()'
-echo $PKG_LIBS
-echo "==========================================="
-echo $PKG_CXXFLAGS
-echo "==========================================="
-echo $PKG_CONFIG_PATH
-echo "==========================================="
-echo $PKG_CPPFLAGS
-echo "==========================================="
-
-#nm $PREFIX/lib/libopenblas.so | grep "LAPACKE_slarfb_work"
-
-echo "==========================================="
-# nlopt
-if pkg-config --exists --atleast-version=2.4 nlopt
-then
-	_LOCATION=`pkg-config --variable=prefix nlopt`
-	echo "nlopt FOUND in [$_LOCATION]"
-else
-	if [ "$BUILD_DEPENDENCIES" == "true" ]
-	then
-		echo "Building NLOPT..."
-		cd $TMPDIR
-		wget http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz -O - | tar -zx
-		cd nlopt-2.4.2
-		./configure --enable-shared --without-guile --prefix=$PREFIX
-		$MAKE || $MAKE VERBOSE=1 || { echo 'NLOPT installation failed' ; exit 1; }
-		$MAKE install
-	else
-		echo "####################"
-		echo "nlopt NOT FOUND"
-		echo "Please download it from: http://ab-initio.mit.edu/nlopt/nlopt-2.4.2.tar.gz"
-		echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-		echo ""
-		err=1
-	fi
-fi
-
-# hwloc
-if pkg-config --exists hwloc
-then
-	_LOCATION=`pkg-config --variable=prefix hwloc`
-	echo "hwloc FOUND in [$_LOCATION]"
-else
-	if [ "$BUILD_DEPENDENCIES" == "true" ]
-	then
-		echo "Building Hwloc..."
-		cd $TMPDIR
-		wget https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz -O - | tar -zx
-		cd hwloc-1.11.5
-		./configure --prefix=$PREFIX
-		$MAKE || $MAKE VERBOSE=1 || { echo 'HWLOC installation failed' ; exit 1; }
-		$MAKE install
-	else
-		echo "####################"
-		echo "hwloc NOT FOUND"
-		echo "Please download it from: https://www.open-mpi.org/software/hwloc/v1.11/downloads/hwloc-1.11.5.tar.gz"
-		echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-		echo ""
-		err=1
-	fi
-fi
-
-
-
-if pkg-config --exists  libstarpu-1.2
-then 
-	echo " libstarpu-1.2  exist"
-else
-	echo "libstarpu-1.2 not exist"
-fi
-
-if pkg-config --exists  starpu-1.2
-then 
-	echo " starpu-1.2  exist"
-else 
-	echo "starpu-1.2 not exist"
-fi
-
-if pkg-config --exists  libstarpu-1.3
-then 
-	echo " libstarpu-1.3  exist"
-else echo "libstarpu-1.3 not exist"
-fi
-
-if pkg-config --exists  starpu-1.3
-then 
-	echo " starpu-1.3  exist"
-else 
-	echo "starpu-1.3 not exist"
-fi
-if pkg-config --exists  libstarpu
-then 
-	echo " libstarpu  exist"
-else
-	echo "libstarpu not exist"
-fi
-if pkg-config --exists  starpu
-then 
-	echo " starpu  exist"
-else
-	echo "starpu not exist"
-
-fi
-
-
-# StarPU
-if pkg-config --exists  starpu-1.2
-
-then
-	_LOCATION=`pkg-config --variable=prefix libstarpu`
-	echo "StarPU FOUND in [$_LOCATION]"
-else
-	if [ "$BUILD_DEPENDENCIES" == "true" ]
-	then
-		echo "Building StarPU..."
-		cd $TMPDIR
-		wget http://starpu.gforge.inria.fr/files/starpu-1.2.9/starpu-1.2.9.tar.gz -O - | tar -zx
-		cd starpu-1.2.9
-		#CFLAGS=-Wno-implicit-function-declaration
-		if [ "$CUDAVALUE" == "ON" ]; then
-			if [ "$MPIVALUE" == "ON" ]; then
-				./configure --disable-starpufft --enable-cuda --disable-opencl --prefix=$PREFIX   --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --with-perf-model-dir=$TMPDIR  --disable-fstack-protector-all --disable-gcc-extensions
-			else
-				./configure --disable-starpufft --enable-cuda --disable-opencl --prefix=$PREFIX   --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all --disable-gcc-extensions
-			fi
-		else
-			if [ "$MPIVALUE" == "ON" ]; then
-				./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX  --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples  --disable-fortran --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all --disable-gcc-extensions
-			else
-				./configure --disable-starpufft --disable-cuda --disable-opencl --prefix=$PREFIX --disable-starpu-top --disable-starpufft --disable-build-doc --disable-starpufft-examples   --disable-fortran --disable-glpk --with-perf-model-dir=$TMPDIR --disable-fstack-protector-all --disable-gcc-extensions
-			fi	
-		fi
-		$MAKE || $MAKE VERBOSE=1 || { echo 'STARPU installation failed' ; exit 1; }
-		$MAKE install
-	else
-		echo "####################"
-		echo "StarPU NOT FOUND"
-		echo "Please download it from: http://starpu.gforge.inria.fr/files/"
-		echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-		echo ""
-		err=1
-	fi
-fi
-
-#echo "???????????????"
-#cp $BASEDIR/src/libs/libudev.so.1 $PREFIX/lib
-#cp $BASEDIR/src/libs/libudev.so $PREFIX/lib
-#echo "????????????"
-
-echo "============STARPU======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
-
-#echo "Sameh ======================================"
-#echo "$(ls $PREFIX/lib)"
-#echo "======================================"
-
-#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PREFIX/lib
-
-cd $BASEDIR
-set -x
-# CHAMELEON
-if pkg-config --exists chameleon
-then
-	_LOCATION=`pkg-config --variable=prefix chameleon`
-	echo "CHAMELEON FOUND in [$_LOCATION]"
-else
-	if [ "$BUILD_DEPENDENCIES" == "true" ]
-	then
-		echo "Building CHAMELEON..."
-		cd $TMPDIR
-		rm -rf h
-		git clone https://github.com/ecrc/hicma h
-		cd h
-		git submodule update --init --recursive 2>&1 >/dev/null || true
-		cd chameleon
-		git checkout 2803719fc79986242d17f79c7bb706b499adef23
-		#cp -r $BASEDIR/src/hicma $TMPDIR/h
-		#cd $TMPDIR/h/chameleon
-		mkdir -p build && cd build
-		rm -rf ./CMake*
-		LDFLAGS="-L$PREFIX/lib" cmake -DCMAKE_C_FLAGS=-fPIC -DCHAMELEON_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DCHAMELEON_USE_CUDA=$CUDAVALUE -DCHAMELEON_ENABLE_EXAMPLE=OFF -DCHAMELEON_ENABLE_TESTING=OFF -DCHAMELEON_ENABLE_TIMING=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$DEFINE_BLAS_LIBS_CMAKE" ..
-		echo "======================================"
-		echo "$(cat ./runtime/starpu/CMakeFiles/runtime_starpu_include.dir/build.make)"
-		echo "$(cat ./build.make)"
-		echo "======================================"
-		$MAKE || $MAKE VERBOSE=1 || { echo 'CHAMELEON installation failed' ; exit 1; }
-		$MAKE install
-	else
-		echo "####################"
-		echo "CHAMELEON NOT FOUND"
-		echo "Please download it from: https://gitlab.inria.fr/solverstack/chameleon.git"
-		echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-		echo ""
-		err=1
-	fi
-fi
-
-
-echo "============CHAMELEON======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
-
-# starsh
-if pkg-config --exists --atleast-version=0.1.1 starsh
-then
-	_LOCATION=`pkg-config --variable=prefix starsh`
-	echo "starsh FOUND in [$_LOCATION]"
-else
-	if [ "$BUILD_DEPENDENCIES" == "true" ]
-	then
-		echo "Building STARS-H..."
-		#cd $BASEDIR/src/stars-h
-		cd $TMPDIR
-		rm -rf stars-h
-		git clone https://github.com/ecrc/stars-h stars-h
-		cd stars-h
-		git checkout 687c2dc6df085655959439c38a40ccbe7cb57f82
-		git submodule update --init --recursive 2>&1 >/dev/null || true
-		mkdir -p build && cd build
-		rm -rf ./CMake*
-		cmake -DCMAKE_C_FLAGS=-fPIC -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DOPENMP=OFF -DSTARPU=OFF  -DEXAMPLES=OFF -DTESTING=OFF -DMPI=$MPIVALUE -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
-		$MAKE || $MAKE VERBOSE=1 || { echo 'STARS-H installation failed' ; exit 1; }
-		$MAKE install
-	else
-		echo "####################"
-		echo "starsh NOT FOUND"
-		echo "Please download it from: https://github.com/ecrc/stars-h"
-		echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-		echo ""
-		err=1
-	fi
-fi
-
-echo "============STARSH======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
-# hicma
-if pkg-config --exists  hicma
-then
-	_LOCATION=`pkg-config --variable=prefix hicma`
-	echo "hicma FOUND in [$_LOCATION]"
-else
-	if [ "$BUILD_DEPENDENCIES" == "true" ]
-	then
-		echo "Building HiCMA..."
-		cd $TMPDIR
-		cd h
-		git checkout c8287eed9ea9a803fc88ab067426ac6baacaa534
-		mkdir -p build && cd build
-		rm -rf ./CMake*
-		cmake -DHICMA_USE_MPI=$MPIVALUE -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DHICMA_ENABLE_TESTING=OFF -DHICMA_ENABLE_TIMING=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" ..
-		$MAKE || $MAKE VERBOSE=1 || { echo 'HICMA installation failed' ; exit 1; }
-		$MAKE install
-	else
-		echo "####################"
-		echo "hicma NOT FOUND"
-		echo "Please download it from: https://github.com/ecrc/hicma"
-		echo "After installing it, set the proper PKG_CONFIG_PATH variable"
-		echo ""
-		err=1
-	fi
-fi
-
-echo "============HICMA======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
-# use rpaths in makefile
-# TODO use a R defined value for PREFIX and have this directly in the Makefile
-
-#Dummy makefile in src to trigger real one from cmake.
-cd $BASEDIR/
-rm -rf ./CMakeFiles ./CMakeCache.txt
-cmake -DCMAKE_BUILD_TYPE="Release" -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DEXAGEOSTAT_EXAMPLES=OFF "$XFLAG" "$DEFINE_BLAS_LIBS_CMAKE" -DEXAGEOSTAT_USE_MPI=$MPIVALUE -DEXAGEOSTAT_USE_HICMA=ON ./src
-echo "============EXAGEOSTAT======================"
-echo "$(ls $PREFIX/lib)"
-echo "======================================"
-echo "$(ls ./src)"
-echo "======================================"
-echo "$(ls ../)"
-echo "======================================"
-echo "$(ls ../src)"
-echo "======================================"
-echo "$(ls ../exageostatr)"
-echo "======================================"
-echo "$(find ../ -name exageostat.so)"
-echo "======================================"
-echo "$(find ../ -name "exageostat.so")"
-echo "======================================"
+echo "CMake Configuration of Exageostat Complete!"
 
 cat > src/Makefile << EOF
 .PHONY: all clean
 all:
-	(cd .. && make VERBOSE=1 && cp ./lib*.${LIBEXT} ./src/exageostat.so)
+	(cd .. && make VERBOSE=1 && cp ./lib*.${LIB_EXT} ./src/exageostat.so)
 
 EOF
 exit $err

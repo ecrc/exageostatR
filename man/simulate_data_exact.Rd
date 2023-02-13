@@ -5,26 +5,23 @@
 \title{Simulate Geospatial data (x, y, z)}
 \usage{
 simulate_data_exact(
-  sigma_sq,
-  beta,
-  nu,
+  kernel = c("ugsm-s", "ugsmn-s", "bgsfm-s", "bgspm-s", "tgspm-s", "ugsm-st", "bgsm-st"),
+  theta,
   dmetric = c("euclidean", "great_circle"),
   n,
   seed = 0
 )
 }
 \arguments{
-\item{sigma_sq}{A number - variance parameter}
-
-\item{beta}{A number - range parameter)}
-
-\item{nu}{A number  - smoothness parameter}
-
 \item{dmetric}{A string -  distance metric - "euclidean" or "great_circle"}
 
 \item{n}{A number -  data size}
 
 \item{seed}{A number -  seed of random generation}
+
+\item{kernel:}{string - kernel  ("ugsm-s", "ugsmn-s",  "bgsfm-s", "bgspm-s", "tgspm-s", "ugsm-st", "bgsm-st")}
+
+\item{theta:}{list of n parameters (estimated theta)}
 }
 \value{
 a list of of three vectors (x, y, z)
@@ -34,16 +31,12 @@ Simulate Geospatial data (x, y, z)
 }
 \examples{
 seed <- 0 ## Initial seed to generate XY locs.
-sigma_sq <- 1 ## Initial variance.
-beta <- 0.1 ## Initial range.
-nu <- 0.5 ## Initial smoothness.
+kernel <- "ugsm-s"
+theta <- c(1, 0.1, 0.5)                                     #Params vector.
 dmetric <- "euclidean" ## "euclidean" or "great_circle" distance.
 n <- 1600 ## The number of locations (n must be a square number, n=m^2).
-exageostat_init(hardware = 
-                list(ncores = 2, ngpus = 0, ts = 320,
-                     pgrid = 1, qgrid = 1)) ## Initiate exageostat instance
-data <- simulate_data_exact(sigma_sq, beta, nu,
-                            dmetric, n, seed) ## Generate Z observation vector
+exageostat_init(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) ## Initiate exageostat instance
+data <- simulate_data_exact(kernel, theta, dmetric, n, seed) ## Generate Z observation vector
 data
 exageostat_finalize() ## Finalize exageostat instance
 }

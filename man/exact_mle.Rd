@@ -6,7 +6,8 @@
 \usage{
 exact_mle(
   data = list(x, y, z),
-  dmetric = 0,
+  kernel = c("ugsm-s", "ugsmn-s", "bgsfm-s", "bgspm-s", "tgspm-s", "ugsm-st", "bgsm-st"),
+  dmetric = c("euclidean", "great_circle"),
   optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-04,
     max_iters = 100)
 )
@@ -17,6 +18,8 @@ exact_mle(
 \item{dmetric}{A string -  distance metric - "euclidean" or "great_circle"}
 
 \item{optimization}{A list of opt lb values (clb), opt ub values (cub), tol, max_iters}
+
+\item{kernel:}{string - kernel  ("ugsm-s", "ugsmn-s",  "bgsfm-s", "bgspm-s", "tgspm-s", "ugsm-st", "bgsm-st")}
 }
 \value{
 vector of three values (theta1, theta2, theta3)
@@ -31,15 +34,12 @@ beta <- 0.1 ## Initial range.
 nu <- 0.5 ## Initial smoothness.
 dmetric <- "euclidean" ## "euclidean" or "great_circle" distance.
 n <- 144 ## The number of locations (n must be a square number, n=m^2).
-exageostat_init(hardware = 
-                list(ncores = 2, ngpus = 0, ts = 32,
-                     pgrid = 1, qgrid = 1)) ## Initiate exageostat instance
-data <- simulate_data_exact(sigma_sq, beta, nu,
-                            dmetric, n, seed) ## Generate Z observation vector
+kernel <- "ugsm-s"
+theta <- c(1, 0.1, 0.5)                                     #Params vector.
+exageostat_init(hardware = list(ncores = 2, ngpus = 0, ts = 320, lts = 0, pgrid = 1, qgrid = 1)) ## Initiate exageostat instance
+data <- simulate_data_exact(kernel, theta, dmetric, n, seed) ## Generate Z observation vector
 ## Estimate MLE parameters (Exact)
-result <- exact_mle(data, dmetric, 
-                    optimization = list(clb = c(0.001, 0.001, 0.001),
-                                        cub = c(5, 5, 5), tol = 1e-4, max_iters = 1))
+result <- exact_mle(data, kernel, dmetric, optimization = list(clb = c(0.001, 0.001, 0.001), cub = c(5, 5, 5), tol = 1e-4, max_iters = 1))
 print(result)
 exageostat_finalize() ## Finalize exageostat instance
 }

@@ -22,91 +22,119 @@ pipeline {
     }
 
     stages {
-        stage ('build-from-github') {
+        stage ('build') {
+
             steps {
-                withCredentials([string(credentialsId: '549fe118-9b01-49f6-9072-a813312a022b', variable: 'GITHUB_PAT')]) {
-                    sh '''#!/bin/bash -le
-module purge
-module load ecrc-extras
-module load mkl/2018-update-1
-module load gcc/5.5.0
-module load pcre
-module load r-base/3.5.1-mkl
+		    withCredentials([string(credentialsId: '549fe118-9b01-49f6-9072-a813312a022b', variable: 'GITHUB_PAT')]) {
 
-module list
-set -x
+            	sh '''#!/bin/bash -le
+		module purge
+        module load ecrc-extras
+        module load mkl/2020.0.166
+        module load gcc/10.2.0
+        module load cmake/3.21.2
+        module load hwloc/2.4.0-gcc-10.2.0
+        module load openmpi/4.1.0-gcc-10.2.0
+        module load starpu/1.3.9-gcc-10.2.0-mkl-openmpi-4.1.0
+        module load gsl/2.6-gcc-10.2.0
+        module load nlopt/2.7.0-gcc-10.2.0
+        module load hdf5/1.12.0-gcc-10.2.0
+        module load netcdf/4.7.4-gcc-10.2.0
+        module load r-base/4.1.2-gcc-10.2.0
 
-export MAKE='make -j 6 -l 8' # try to build in parallel
+        module list
+        set -x
 
-_REPO=`git config --get remote.origin.url | cut -d "/" -f 4,5,6| sed 's/\\.git$//'`
-Rscript -e "Sys.setenv(PKG_CONFIG_PATH=paste(Sys.getenv('PKG_CONFIG_PATH'),paste(.libPaths(),'exageostat/lib/pkgconfig',sep='/',collapse=':'),sep=':')); library(devtools); install_github(repo='$_REPO',ref='$BRANCH_NAME',auth_token='$GITHUB_PAT',quiet=FALSE);"
+        #export the shared R libraries path
+        export R_LIBS=/opt/ecrc/r-base/4.1.2-gcc-10.2.0/ub18/libraries
+        export LD_PRELOAD=/opt/ecrc/mkl/2020.0.166/mkl/lib/intel64/libmkl_def.so:/opt/ecrc/mkl/2020.0.166/mkl/lib/intel64/libmkl_avx2.so:/opt/ecrc/mkl/2020.0.166/mkl/lib/intel64/libmkl_core.so:/opt/ecrc/mkl/2020.0.166/mkl/lib/intel64/libmkl_intel_lp64.so:/opt/ecrc/mkl/2020.0.166/mkl/lib/intel64/libmkl_intel_thread.so:/opt/ecrc/intelmpi/2020.0.166/lib/intel64/libiomp5.so
 
-Rscript tests/test1.R
-'''
-                }
+        #Try to build in parallel
+		export MAKE='make -j 6 -l 8'
+		git submodule update --recursive --init
+
+        export EXAGEOSTATR=$PWD
+		##### BUILDING EXAGEOSTAT-R DEPENDENCIES #####
+		    export EXAGEOSTATDEVDIR=$PWD/src
+            export HICMADIR=$EXAGEOSTATDEVDIR/hicma
+            export CHAMELEONDIR=$EXAGEOSTATDEVDIR/chameleon
+            export STARSHDIR=$HICMADIR/stars-h
+            export HCOREDIR=$HICMADIR/hcore
+            export HICMAINSTALLDIR=$HICMADIR/dependencies-prefix
+
+            cd $EXAGEOSTATDEVDIR
+            # Update submodules
+            git submodule update --init --recursive
+            ls
+
+            ## CHAMELEON
+            cd $CHAMELEONDIR
+            git checkout release-1.1.0
+
+            #install Chameleon
+            rm -rf build
+            mkdir -p build/installdir
+            cd build
+            cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DCMAKE_C_FLAGS=-fPIC -DCHAMELEON_USE_MPI=OFF -DCMAKE_BUILD_TYPE="Release" \
+            -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DCHAMELEON_USE_CUDA=OFF -DCHAMELEON_ENABLE_EXAMPLE=OFF \
+            -DCHAMELEON_ENABLE_TESTING=OFF -DCHAMELEON_ENABLE_TIMING=OFF -DBUILD_SHARED_LIBS=OFF
+
+            make clean
+            make -j # CHAMELEON parallel build seems to be fixed
+            make install
+            export PKG_CONFIG_PATH=$PWD/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
+
+            ## HICMA
+            cd $HICMADIR
+            git submodule update --init --recursive
+            mkdir -p $HICMAINSTALLDIR
+            rm -rf $HICMAINSTALLDIR/*
+
+                # STARS-H
+                cd $STARSHDIR
+                rm -rf build
+                mkdir -p build
+                cd build
+                cmake .. -DCMAKE_INSTALL_PREFIX=$HICMAINSTALLDIR -DMPI=OFF -DOPENMP=OFF -DSTARPU=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_C_FLAGS=-fPIC -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w"
+                make clean
+                make -j
+                make install
+
+                ## HCORE
+                cd $HCOREDIR
+                rm -rf build
+                mkdir -p build
+                cd build
+                cmake .. -DCMAKE_INSTALL_PREFIX=$HICMAINSTALLDIR -DCMAKE_C_FLAGS=-fPIC -DBUILD_SHARED_LIBS=ON -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w"
+                make clean
+                make -j
+                make install
+
+            export PKG_CONFIG_PATH=$HICMAINSTALLDIR/lib/pkgconfig:$PKG_CONFIG_PATH
+            cd $HICMADIR
+            rm -rf build
+            mkdir -p build/installdir
+            cd build
+            cmake .. -DCMAKE_INSTALL_PREFIX=$PWD/installdir -DCMAKE_C_FLAGS=-fPIC -DHICMA_USE_MPI="$MPI_VALUE" -DCMAKE_BUILD_TYPE="Release" \
+            -DCMAKE_C_FLAGS_RELEASE="-O3 -Ofast -w" -DBUILD_SHARED_LIBS=ON -DCMAKE_C_FLAGS="-fcommon"
+            make clean
+            make -j
+            make install
+            export PKG_CONFIG_PATH=$PWD/installdir/lib/pkgconfig:$PKG_CONFIG_PATH
+
+        ##### BUILDING EXAGEOSTAT-R ######
+        cd $EXAGEOSTATR
+        mkdir R_LIB
+        R CMD build .
+        package=$(ls -rt exa*z | tail -n 1)
+        R CMD INSTALL ./$package --library=$PWD/R_LIB/
+
+        R CMD check . --no-manual
+		'''
+                
             }
+		      }
         }
-        stage ('build-locally') {
-            steps {
-                sh '''#!/bin/bash -le
-module purge
-module load ecrc-extras
-module load mkl/2018-update-1
-module load gcc/5.5.0
-module load pcre
-module load r-base/3.5.1-mkl
-#module load gsl/2.4-gcc-5.5.0
-#module load nlopt/2.4.2-gcc-5.5.0
-#module load hwloc/1.11.8-gcc-5.5.0
-#module load starpu/1.2.6-gcc-5.5.0-mkl-openmpi-3.0.0
-
-
-module list
-set -x
-
-export MAKE='make -j 6 -l 8' # try to build in parallel
-
-# export PKG_CONFIG_PATH 
-$(Rscript -e '.libPaths()' | gawk -v pkgp="$PKG_CONFIG_PATH" 'BEGIN {printf "export PKG_CONFIG_PATH=%s:",pkgp}; {printf "%s/exageostat/lib/pkgconfig:",substr($2,2,length($2)-2)};')
-
-R CMD build .
-package=$(ls -rt exa*z | tail -n 1)
-R CMD INSTALL ./$package
-Rscript tests/test1.R
-
-'''
-            }
-        }
-  /*      stage ('build-gpu') {
-            agent { label 'gpu' }
-            steps {
-                sh '''#!/bin/bash -le
-module purge
-module load ecrc-extras
-module load mkl/2018-update-1
-module load gcc/5.5.0
-module load pcre
-module load r-base/3.5.1-mkl
-module load cuda/10.0
-
-
-module list
-set -x
-
-export MAKE='make -j 6 -l 8' # try to build in parallel
-
-# export PKG_CONFIG_PATH
-$(Rscript -e '.libPaths()' | gawk -v pkgp="$PKG_CONFIG_PATH" 'BEGIN {printf "export PKG_CONFIG_PATH=%s:",pkgp}; {printf "%s/exageostat/lib/pkgconfig:",substr($2,2,length($2)-2)};')
-
-R CMD build .
-package=$(ls -rt exa*z | tail -n 1)
-R CMD INSTALL --configure-args='--enable-cuda' ./$package
-Rscript tests/test1.R
-
-'''
-            }
-        }
-        */
     }
 
     // Post build actions
