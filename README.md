@@ -50,7 +50,6 @@ Or
 ```R
 R CMD INSTALL geoR*.tar.gz
 ```
-<<<<<<< HEAD
 
 #### [Fields](https://cran.r-project.org/web/packages/fields/index.html)
 For installation, type at the R prompt:
@@ -70,53 +69,13 @@ For installation, type at the R prompt:
 install.packages("GpGp")
 ```
 
-### Installing ExageoStat-R library
-
-=======
-
-#### [Fields](https://cran.r-project.org/web/packages/fields/index.html)
-For installation, type at the R prompt:
-```R
-install.packages("fields", dependencies = TRUE)
-```
-
-#### [spam](https://cran.r-project.org/web/packages/spam/index.html)
-For installation, type at the R prompt:
-```R
-install.packages("spam")
-```
-
-#### [GpGp](https://cran.r-project.org/web/packages/GpGp/index.html)
-For installation, type at the R prompt:
-```R
-install.packages("GpGp")
-```
-
-### Installing ExageoStat-R library
-
->>>>>>> to-release
 #### Install latest ExaGeoStatR version hosted on GitHub (parallel installation)
 ```r
 library("devtools")
 Sys.setenv(MKLROOT="/opt/intel/mkl")
-<<<<<<< HEAD
 install_git(url="https://github.com/ecrc/exageostatR")
 ```
 
-
-#### Install latest ExaGeoStatR version hosted on GitHub (sequential installation)
-```r
-library("devtools")
-Sys.setenv(MKLROOT="/opt/intel/mkl")
-Sys.setenv(MAKE="make -j 1")
-=======
->>>>>>> to-release
-install_git(url="https://github.com/ecrc/exageostatR")
-```
-
-
-<<<<<<< HEAD
-=======
 #### Install latest ExaGeoStatR version hosted on GitHub (sequential installation)
 ```r
 library("devtools")
@@ -125,8 +84,6 @@ Sys.setenv(MAKE="make -j 1")
 install_git(url="https://github.com/ecrc/exageostatR")
 ```
 
-
->>>>>>> to-release
 #### Install latest ExaGeoStatR version hosted on GitHub with GPU support
 ```r
 library("devtools")
